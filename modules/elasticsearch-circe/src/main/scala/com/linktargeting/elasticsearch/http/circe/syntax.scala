@@ -1,4 +1,4 @@
-package com.linktargeting.elasticsearch.circe
+package com.linktargeting.elasticsearch.http.circe
 
 import com.linktargeting.elasticsearch.api._
 import io.circe.parser.parse
@@ -49,11 +49,6 @@ private[circe] final class JsonOps(c: ACursor) {
   def int(default: Int): Int = as[Int](default)
   def optInt: Option[Int] = opt[Int]
 
-  //  def jsonDocuments: List[JsonDocument[Json]] = as[Seq[JsonDocument[Json]]].toList
-  //  def suggestOptions: List[SuggestOption] = as[Seq[SuggestOption]].toList
-  //  def suggestions: List[Suggestion] = as[Seq[Suggestion]].toList
-  //  def hits: Hits[Json] = as[Hits[Json]](Hits[Json](0, 0, List.empty))
-  //  def bulkItems: Seq[BulkItem] = as[Seq[BulkItem]]
   def shards: Shards = as[Shards](Shards(0, 0, 0))
   def response: Response = as[Response](Response(Shards(0, 0, 0), "", "", "", 0))
   def bulkResponses: Seq[BulkResponse] = as[Seq[BulkResponse]](Seq.empty)

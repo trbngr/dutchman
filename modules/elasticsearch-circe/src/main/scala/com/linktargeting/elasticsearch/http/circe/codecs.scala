@@ -1,4 +1,4 @@
-package com.linktargeting.elasticsearch.circe
+package com.linktargeting.elasticsearch.http.circe
 
 import com.linktargeting.elasticsearch.api._
 import io.circe.generic.semiauto._
