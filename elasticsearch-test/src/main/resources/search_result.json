@@ -1,0 +1,65 @@
+{
+  "took": 9,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "hits": {
+    "total": 43,
+    "max_score": 0,
+    "hits": [
+      {
+        "_index": "people",
+        "_type": "person",
+        "_id": "cuAR4R",
+        "_score": 0,
+        "_source": {
+          "name": "Chris",
+          "city": "Phoenix"
+        }
+      },
+      {
+        "_index": "people",
+        "_type": "person",
+        "_id": "cXfAg5",
+        "_score": 0,
+        "_source": {
+          "name": "Scott",
+          "city": "Gilbert"
+        }
+      },
+      {
+        "_index": "people",
+        "_type": "link",
+        "_id": "y0FfLe",
+        "_score": 0,
+        "_source": {
+          "name": "Alice",
+          "city": "Waddel"
+        }
+      },
+      {
+        "_index": "people",
+        "_type": "link",
+        "_id": "kZwiEH",
+        "_score": 0,
+        "_source": {
+          "name": "Mom",
+          "city": "Prescott"
+        }
+      },
+      {
+        "_index": "people",
+        "_type": "link",
+        "_id": "y9fGmj",
+        "_score": 0,
+        "_source": {
+          "name": "Jimmy",
+          "city": "San Francisco"
+        }
+      }
+    ]
+  }
+}

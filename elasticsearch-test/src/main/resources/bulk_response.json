@@ -1,0 +1,146 @@
+{
+  "took" : 92,
+  "errors" : false,
+  "items" : [
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "Gsi",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "xvP",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "1Ib",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "Be7",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "XWy",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "gcm",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "6Pd",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "27D",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "yuW",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    },
+    {
+      "index" : {
+        "_index" : "bulk_specs",
+        "_type" : "people",
+        "_id" : "XaY",
+        "_version" : 1,
+        "_shards" : {
+          "total" : 2,
+          "successful" : 1,
+          "failed" : 0
+        },
+        "status" : 201
+      }
+    }
+  ]
+}
