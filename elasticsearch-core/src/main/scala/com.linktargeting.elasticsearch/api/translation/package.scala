@@ -1,13 +1,13 @@
 package com.linktargeting.elasticsearch.api
 
+import com.linktargeting.elasticsearch.http._
 import com.linktargeting.elasticsearch.http.marshalling.ApiMarshaller
 
-package object translation
-  extends document
-    with indices
-    with search {
+package object translation {
 
-  import com.linktargeting.elasticsearch.http._
+  import document.DocumentApiTranslator
+  import indices.IndicesApiTranslator
+  import search.SearchApiTranslator
 
   def apiData(api: Api): Map[String, Any] = ApiTranslator.data(api)
   def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = {
