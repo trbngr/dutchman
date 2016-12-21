@@ -4,7 +4,7 @@ import com.linktargeting.elasticsearch.api._
 
 object query {
 
-  private[translation] object QueryTranslator extends DataTranslator[Query] {
+  object QueryTranslator extends DataTranslator[Query] {
     def data(query: Query) = {
       val options = query match {
         case x: QueryLike ⇒ Map.empty ++ x.options.size.map("size" → _)

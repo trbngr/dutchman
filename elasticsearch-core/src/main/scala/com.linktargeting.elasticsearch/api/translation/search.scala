@@ -5,7 +5,7 @@ import com.linktargeting.elasticsearch.http._
 
 object search {
 
-  import query._
+  import query.QueryTranslator
 
   object SearchApiTranslator extends DataTranslator[SearchApi] with RequestTranslator[SearchApi] {
 
