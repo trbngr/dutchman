@@ -9,33 +9,33 @@ package object translation
 
   import com.linktargeting.elasticsearch.http._
 
-  def apiData(api: Api): Map[String, Any] = ApiMapper.data(api)
+  def apiData(api: Api): Map[String, Any] = ApiTranslator.data(api)
   def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = {
-    ApiMapper.buildRequest(api).copy(
+    ApiTranslator.request(api).copy(
       payload = marshaller.stringify(api)
     )
   }
 
-  private[this] implicit object ApiMapper extends DataMapper[Api] with HttpBuilder[Api] {
+  private[this] implicit object ApiTranslator extends DataTranslator[Api] with RequestTranslator[Api] {
     def data(api: Api) = api match {
-      case v: DocumentApi ⇒ DocumentApiMapper.data(v)
-      case v: IndicesApi  ⇒ IndicesApiMapper.data(v)
-      case v: SearchApi   ⇒ SearchApiMapper.data(v)
+      case v: DocumentApi ⇒ DocumentApiTranslator.data(v)
+      case v: IndicesApi  ⇒ IndicesApiTranslator.data(v)
+      case v: SearchApi   ⇒ SearchApiTranslator.data(v)
     }
 
-    def buildRequest(api: Api) = api match {
-      case v: DocumentApi ⇒ DocumentApiMapper.buildRequest(v)
-      case v: IndicesApi  ⇒ IndicesApiMapper.buildRequest(v)
-      case v: SearchApi   ⇒ SearchApiMapper.buildRequest(v)
+    def request(api: Api) = api match {
+      case v: DocumentApi ⇒ DocumentApiTranslator.request(v)
+      case v: IndicesApi  ⇒ IndicesApiTranslator.request(v)
+      case v: SearchApi   ⇒ SearchApiTranslator.request(v)
     }
   }
 
-  trait DataMapper[A] {
+  trait DataTranslator[A] {
     def data(o: A): Map[String, Any]
   }
 
-  trait HttpBuilder[A <: Api] {
-    def buildRequest(op: A): Request
+  trait RequestTranslator[A <: Api] {
+    def request(op: A): Request
   }
 
   trait EsDocument[A] {

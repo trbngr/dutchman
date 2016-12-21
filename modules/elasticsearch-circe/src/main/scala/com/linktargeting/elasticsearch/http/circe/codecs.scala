@@ -1,5 +1,6 @@
 package com.linktargeting.elasticsearch.http.circe
 
+import cats.syntax.either._
 import com.linktargeting.elasticsearch.api._
 import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder, Json}

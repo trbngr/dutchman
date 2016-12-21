@@ -4,25 +4,25 @@ import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.http._
 
 trait indices {
-  private[translation] object IndicesApiMapper extends DataMapper[IndicesApi] with HttpBuilder[IndicesApi] {
+  private[translation] object IndicesApiTranslator extends DataTranslator[IndicesApi] with RequestTranslator[IndicesApi] {
     def data(api: IndicesApi) = api match {
-      case x: DeleteIndex ⇒ DeleteIndexMapper.data(x)
-      case x: Refresh     ⇒ RefreshMapper.data(x)
+      case x: DeleteIndex ⇒ DeleteIndexTranslator.data(x)
+      case x: Refresh     ⇒ RefreshTranslator.data(x)
     }
-    def buildRequest(api: IndicesApi) = api match {
-      case x: DeleteIndex ⇒ DeleteIndexMapper.buildRequest(x)
-      case x: Refresh     ⇒ RefreshMapper.buildRequest(x)
+    def request(api: IndicesApi) = api match {
+      case x: DeleteIndex ⇒ DeleteIndexTranslator.request(x)
+      case x: Refresh     ⇒ RefreshTranslator.request(x)
     }
   }
 
-  private[translation] object DeleteIndexMapper extends DataMapper[DeleteIndex] with HttpBuilder[DeleteIndex] {
+  private[translation] object DeleteIndexTranslator extends DataTranslator[DeleteIndex] with RequestTranslator[DeleteIndex] {
     def data(x: DeleteIndex) = Map.empty
-    def buildRequest(op: DeleteIndex) = Request(DELETE, s"/${op.index.name}")
+    def request(op: DeleteIndex) = Request(DELETE, s"/${op.index.name}")
   }
 
-  private[translation] object RefreshMapper extends DataMapper[Refresh] with HttpBuilder[Refresh] {
+  private[translation] object RefreshTranslator extends DataTranslator[Refresh] with RequestTranslator[Refresh] {
     def data(api: Refresh) = Map.empty
-    def buildRequest(op: Refresh) = {
+    def request(op: Refresh) = {
       Request(POST, op match {
         case Refresh(indices) if indices.isEmpty ⇒ "/_refresh"
         case Refresh(indices)                    ⇒ s"/${indices.map(_.name).mkString(",")}/_refresh"

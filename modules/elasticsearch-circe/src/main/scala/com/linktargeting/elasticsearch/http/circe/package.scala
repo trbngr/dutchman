@@ -1,5 +1,6 @@
 package com.linktargeting.elasticsearch.http
 
+import cats.syntax.either._
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.http.marshalling._
 import io.circe._
