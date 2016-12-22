@@ -1,6 +1,7 @@
 package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
+import com.linktargeting.elasticsearch.client._
 import com.linktargeting.elasticsearch.http._
 import com.linktargeting.elasticsearch.model.Person
 import com.linktargeting.elasticsearch.search._
@@ -19,8 +20,6 @@ trait ApiSpecs[Json]
     //    with BulkSpecs[Json]
     //    with SearchSpecs[Json]
     with ScrollSpecs[Json] {
-
-  import http.syntax._
 
   val tpe = Type("person")
 

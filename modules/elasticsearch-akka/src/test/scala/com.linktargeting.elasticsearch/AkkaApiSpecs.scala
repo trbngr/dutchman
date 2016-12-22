@@ -3,7 +3,7 @@ package com.linktargeting.elasticsearch
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
-import com.linktargeting.elasticsearch.circe._
+import com.linktargeting.elasticsearch.http.circe._
 import com.linktargeting.elasticsearch.http.marshalling._
 import com.linktargeting.elasticsearch.model._
 import io.circe.Json

@@ -39,7 +39,7 @@ package object translation {
   }
 
   trait EsDocument[A] {
-    implicit def asDocument(a: A): Document
+    def asDocument(a: A): Document
   }
 
 }

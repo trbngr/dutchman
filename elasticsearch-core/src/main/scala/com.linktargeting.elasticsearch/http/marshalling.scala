@@ -40,7 +40,10 @@ object marshalling {
       def response(json: Json) = u.deleteIndex(json)
     }
     implicit class BulkResponseSyntax[Json](api: Bulk)(implicit u: ApiUnMarshaller[Json]) {
-      def response(json: Json) = u.bulk(json)
+      def response(json: Json) = {
+        println(s"bulk: $json")
+        u.bulk(json)
+      }
     }
     implicit class SearchResponseSyntax[Json](api: Search)(implicit u: ApiUnMarshaller[Json]) {
       def response(json: Json) = u.search(json)

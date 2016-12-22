@@ -7,6 +7,6 @@ object model {
   case class Person(id: String, name: String, city: String)
 
   implicit object PersonMapper extends EsDocument[Person] {
-    override implicit def asDocument(a: Person): Document = Document(Id(a.id), Map("id" → a.id, "name" → a.name, "city" → a.city))
+    override def asDocument(a: Person): Document = Document(Id(a.id), Map("id" → a.id, "name" → a.name, "city" → a.city))
   }
 }

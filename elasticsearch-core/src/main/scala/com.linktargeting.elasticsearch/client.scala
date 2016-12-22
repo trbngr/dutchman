@@ -1,13 +1,34 @@
-package com.linktargeting.elasticsearch.http
+package com.linktargeting.elasticsearch
 
-import com.linktargeting.elasticsearch._
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.api.translation._
-import marshalling._
+import com.linktargeting.elasticsearch.api.translation.apiRequest
+import com.linktargeting.elasticsearch.http.{Endpoint, EsRequestSigner, HttpClient, NullRequestSigner}
+import com.linktargeting.elasticsearch.http.marshalling.{ApiMarshaller, ApiUnMarshaller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object syntax {
+object client {
+  trait ESClient[Json] {
+
+    val document: DocumentApiClient[Json]
+    val indices: IndicesApiClient[Json]
+
+    def apply(api: Search): Future[SearchResponse[Json]]
+    def apply(api: StartScroll): Future[ScrollResponse[Json]]
+    def apply(api: Scroll): Future[ScrollResponse[Json]]
+    def apply(api: ClearScroll): Future[Unit]
+  }
+
+  trait DocumentApiClient[Json] {
+    def apply(api: Index): Future[IndexResponse]
+    def apply(api: Bulk): Future[Seq[BulkResponse]]
+  }
+
+  trait IndicesApiClient[Json] {
+    def apply(api: DeleteIndex): Future[DeleteIndexResponse]
+    def apply(api: Refresh): Future[RefreshResponse]
+  }
+
   implicit class ClientSugar(client: HttpClient) {
     def connect[Json](endpoint: Endpoint, signer: EsRequestSigner = NullRequestSigner)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): ESClient[Json] = {
       new ConnectedClient[Json](client, endpoint, signer)
@@ -19,7 +40,7 @@ object syntax {
       with DocumentApiClient[Json]
       with IndicesApiClient[Json] {
 
-    import marshalling.syntax._
+    import com.linktargeting.elasticsearch.http.marshalling.syntax._
 
     private def exe(api: Api) = client.execute[Json](endpoint, signer)(apiRequest(api))
 
