@@ -22,6 +22,7 @@ trait ScrollSpecs[Json] {
         ))
       )
     }
+
     client.document(Bulk(actions: _*)) map { _ ⇒
       refresh(idx)
     }
@@ -31,30 +32,32 @@ trait ScrollSpecs[Json] {
     "work" in {
       whenReady(indexPeople) { _ ⇒
         var ids = Set.empty[String]
+
         try {
           val query = PrefixQuery("name", "even")
 
-          val start = client(StartScroll(idx, tpe, query)).futureValue
+          val start = StartScroll(idx, tpe, query)().futureValue
           ids = ids + start.scrollId
-
           start.scrollId shouldNot be(empty)
           start.results.documents foreach println
           start.results.total shouldBe 10
+
           val persons = start.results.documents.map(x ⇒ readPerson(x.source))
           persons.size shouldBe 10
 
           if (persons.size != start.results.total) {
             //next page
-            val page = client(Scroll(start.scrollId)).futureValue
-            ids = ids + page.scrollId
+            val page = Scroll(start.scrollId)().futureValue
 
+            ids = ids + page.scrollId
             page.scrollId shouldNot be(empty)
             page.results.total shouldBe 10
             val nextPersons = page.results.documents.map(x ⇒ readPerson(x.source))
             nextPersons.size shouldBe 5
           }
         } finally {
-          client(ClearScroll(ids)).futureValue
+          ClearScroll(ids)().futureValue
+
           deleteIndex(idx)
         }
       }

@@ -18,7 +18,6 @@ object AkkaHttpClient {
 class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extends http.HttpClient {
 
   import marshalling._
-  import marshalling.syntax._
 
   val http = Http(system)
   implicit val ec = system.dispatcher
@@ -27,9 +26,9 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
     http.singleRequest(buildRequest(endpoint, signer, request)) flatMap { response =>
       response.entity.json { response ⇒
-        val json = response.parseJson
+        val json = unMarshaller.read(response)
         logger.debug(s"ES Response: : $json")
-        json.readError match {
+        unMarshaller.readError(json) match {
           case Some(errors) ⇒ throw ESErrorsException(errors)
           case _            ⇒ json
         }

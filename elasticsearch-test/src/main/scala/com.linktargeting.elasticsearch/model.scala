@@ -6,7 +6,7 @@ import com.linktargeting.elasticsearch.api.translation.ESDocument
 object model {
   case class Person(id: String, name: String, city: String)
 
-  implicit object PersonDocument extends ESDocument[Person] {
-    override def document(a: Person): Document = Document(Id(a.id), Map("id" → a.id, "name" → a.name, "city" → a.city))
+  implicit val personDocument = new ESDocument[Person] {
+    def document(a: Person): Document = Document(Id(a.id), Map("id" → a.id, "name" → a.name, "city" → a.city))
   }
 }

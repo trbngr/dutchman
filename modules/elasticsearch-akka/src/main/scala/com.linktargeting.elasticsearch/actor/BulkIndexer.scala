@@ -3,7 +3,7 @@ package com.linktargeting.elasticsearch.actor
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.client._
+import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.http.marshalling.ApiMarshaller
 import com.linktargeting.elasticsearch.util.InstrumentationContext
 
@@ -16,14 +16,14 @@ object BulkIndexer {
   case class DocumentIndexed(response: BulkResponse)
   case class DocumentNotIndexed(cause: String, action: BulkAction, api: SingleDocumentApi)
 
-  def props[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit marshaller: ApiMarshaller): Props = {
+  def props[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit marshaller: ApiMarshaller): Props = {
     Props(new BulkIndexer[Json](client, config))
   }
 
-  def props[Json](client: ESClient[Json])(implicit marshaller: ApiMarshaller): Props = props(client, BulkIndexerConfig())
+  def props[Json](client: Dsl[Json])(implicit marshaller: ApiMarshaller): Props = props(client, BulkIndexerConfig())
 }
 
-class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit val marshaller: ApiMarshaller) extends Actor {
+class BulkIndexer[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit val marshaller: ApiMarshaller) extends Actor {
 
   import BulkIndexer._
   import akka.pattern.pipe

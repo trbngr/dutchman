@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.linktargeting.elasticsearch.AkkaHttpClient
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.client._
+import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.http.{Endpoint, circe}
 import com.linktargeting.elasticsearch.model._
 import io.circe.generic.semiauto.deriveDecoder
@@ -30,7 +30,7 @@ class BulkIndexerSpecs extends TestKit(ActorSystem("BulkIndexerSpecs"))
   implicit val personDecoder = deriveDecoder[Person]
 
   val httpClient = new AkkaHttpClient()
-  val client = httpClient.connect(Endpoint.localhost)
+  val client = httpClient.bind(Endpoint.localhost)
 
   val idx = Idx("bulk_indexer_specs")
   val tpe = Type("person")

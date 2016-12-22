@@ -3,6 +3,7 @@ package com.linktargeting.elasticsearch
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.http.circe._
 import com.linktargeting.elasticsearch.model._
+import cats.syntax.either._
 import io.circe.Json
 import io.circe.parser._
 import org.scalatest.{FlatSpec, Matchers}

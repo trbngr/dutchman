@@ -13,7 +13,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.api.translation._
-import com.linktargeting.elasticsearch.client._
+import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.{AkkaHttpClient, http}
 import io.circe.Json
 
@@ -36,7 +36,14 @@ object Example extends App {
 
   //That kind of sucks. This isn't Java ;)
   //Let's use the DSL
-  val client: ESClient[Json] = httpClient.connect(endpoint)
+  implicit val dsl: Dsl[Json] = httpClient.bind(endpoint)
+
+  //You can use the DSL directly via it's different apis.
+  dsl.document
+  dsl.indices
+  dsl.search
+
+  //Or just use it implicitly.
 
   val query = PrefixQuery("user", "kimchy")
 
@@ -44,7 +51,7 @@ object Example extends App {
   //or save some keystrokes
   val api = Search("twitter", "tweet", query)
 
-  client(api) map { (response: SearchResponse[Json]) ⇒
+  api { (response: SearchResponse[Json]) ⇒
     println(s"total: ${response.total}")
     println(s"shards: ${response.shards}")
 
@@ -63,18 +70,20 @@ object Example extends App {
     }
   }
 
-  client.document(Index("people", "person", Document("1", Map("name" → "Chris"))))
+  Index("people", "person", Document("1", Map("name" → "Chris"))) map { (r: IndexResponse) ⇒ println(s"Indexed: $r") }
 
   //That Document is necessary but you can bring your own classes too
   case class Person(id: Int, name: String)
-  implicit object PersonDocument extends ESDocument[Person] {
+  implicit val personDocument = new ESDocument[Person] {
     def document(a: Person) = Document(a.id.toString, Map("name" → a.name))
   }
 
-  client.document(Index("people", "person", Person(1, "Christopher")))
+  Index("people", "person", Person(1, "Christopher")) map { (r: IndexResponse) ⇒ println(s"Indexed: $r") }
 
   //IndexApi
-  client.indices(Refresh("people")).map { (r: RefreshResponse) ⇒ println(s"shards: ${r.shards}") }
+  Refresh("people") { (r: RefreshResponse) ⇒
+    println(s"shards: ${r.shards}")
+  }
 
   //Bulk
   val actions = Seq(
@@ -83,7 +92,7 @@ object Example extends App {
     Bulk(Index("people", "person", Person(3, "Misty")))
   )
 
-  client.document(Bulk(actions: _*)) map { (responses: Seq[BulkResponse]) ⇒
+  Bulk(actions: _*) { (responses: Seq[BulkResponse]) ⇒
     responses foreach { (response: BulkResponse) ⇒
       val status: Int = response.status
       val action: BulkAction = response.action

@@ -1,7 +1,7 @@
 package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.client._
+import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.http._
 import com.linktargeting.elasticsearch.model.Person
 import com.linktargeting.elasticsearch.search._
@@ -29,7 +29,7 @@ trait ApiSpecs[Json]
   implicit val marshaller: marshalling.ApiMarshaller
   implicit val unMarshaller: marshalling.ApiUnMarshaller[Json]
 
-  lazy val client: ESClient[Json] = httpClient.connect(Endpoint.localhost, NullRequestSigner)
+  lazy implicit val client: Dsl[Json] = httpClient.bind(Endpoint.localhost, NullRequestSigner)
 
   def deleteIndex(idx: Idx) = client.indices(DeleteIndex(idx)).futureValue
   def refresh(index: Idx) = client.indices(Refresh(index)).futureValue

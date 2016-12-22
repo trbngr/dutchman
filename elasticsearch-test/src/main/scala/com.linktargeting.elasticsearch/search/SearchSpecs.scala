@@ -19,8 +19,10 @@ trait SearchSpecs[Json] {
         name = s"${if (i % 2 == 0) "even" else "odd"}-${Random.alphanumeric.take(3).mkString}",
         city = Random.alphanumeric.take(3).mkString
       )
+
       Bulk(Index(idx, tpe, person))
     }
+
     client.document(Bulk(actions: _*)) map { _ ⇒
       refresh(idx)
     }
@@ -31,11 +33,17 @@ trait SearchSpecs[Json] {
       "work" in {
         whenReady(indexPeople) { _ ⇒
           try {
-            val response = client(Search(idx, tpe, PrefixQuery("name", "even"))).futureValue
+            val response = for {
+              res ← Search(idx, tpe, PrefixQuery("name", "even"))
+            } yield res
 
-            response.total shouldBe 5
-            val persons = response.documents.map(x ⇒ readPerson(x.source))
-            persons.size shouldBe 5
+            Search(idx, tpe, PrefixQuery("name", "even")) { response ⇒
+              response.total shouldBe 5
+
+              val persons = response.documents.map(x ⇒ readPerson(x.source))
+
+              persons.size shouldBe 5
+            } futureValue
           } finally deleteIndex(idx)
         }
       }
