@@ -6,7 +6,7 @@ import com.linktargeting.elasticsearch.http._
 import org.scalatest.{FlatSpec, Matchers}
 
 class SignerSpecs extends FlatSpec with Matchers {
-  val signer: EsRequestSigner = AwsSigner(new BasicAWSCredentials("keyid", "key"), "us-west-2")
+  val signer: ESRequestSigner = AWSSigner(new BasicAWSCredentials("keyid", "key"), "us-west-2")
 
   "signing" should "work" in {
     val request = signer.sign(Endpoint.localhost, Request(GET, "/_bulk", Map("version" → "2")))
@@ -18,7 +18,7 @@ class SignerSpecs extends FlatSpec with Matchers {
 
     auth.value match {
       case pattern(algo, cred, signedHeaders, sig) ⇒
-        algo shouldBe AwsSigner.Algorithm
+        algo shouldBe AWSSigner.Algorithm
         cred should startWith("keyid")
         signedHeaders shouldBe "host;x-amz-date"
         sig shouldNot be(empty)

@@ -16,7 +16,7 @@ package object api {
 
   case class Shards(total: Int, failed: Int, successful: Int)
   case class Response(shards: Shards, index: String, `type`: String, id: String, version: Int)
-  case class EsError(index: String, `type`: String, id: String, status: Int)
+  case class ESError(index: String, `type`: String, id: String, status: Int)
 
   case class Id(value: String)
   case class Idx(name: String)
@@ -26,11 +26,11 @@ package object api {
   case class Document(id: Id, data: Map[String, Any])
 
   object Index {
-    def apply[A: EsDocument](index: Idx, `type`: Type, document: A, version: Option[Int] = None): Index = new Index(index, `type`, implicitly[EsDocument[A]].asDocument(document), version)
+    def apply[A: ESDocument](index: Idx, `type`: Type, document: A, version: Option[Int] = None): Index = new Index(index, `type`, implicitly[ESDocument[A]].document(document), version)
   }
 
   object Update {
-    def apply[A: EsDocument](index: Idx, `type`: Type, document: A): Update = new Update(index, `type`, implicitly[EsDocument[A]].asDocument(document))
+    def apply[A: ESDocument](index: Idx, `type`: Type, document: A): Update = new Update(index, `type`, implicitly[ESDocument[A]].document(document))
   }
 
   case class Index(index: Idx, `type`: Type, document: Document, version: Option[Int]) extends SingleDocumentApi
@@ -68,10 +68,10 @@ package object api {
 
   //search api
   case class QueryOptions(size: Option[Int] = None)
-  sealed trait QueryLike extends Query {
+  sealed trait QueryWithOptions extends Query {
     val options: QueryOptions
   }
-  case class PrefixQuery(field: String, value: String, boost: Float = 0, options: QueryOptions = QueryOptions()) extends QueryLike
+  case class PrefixQuery(field: String, value: String, boost: Float = 0, options: QueryOptions = QueryOptions()) extends QueryWithOptions
 
   object Search {
     def apply(index: Idx, `type`: Type, query: Query): Search = new Search(Seq(index), Seq(`type`), query)

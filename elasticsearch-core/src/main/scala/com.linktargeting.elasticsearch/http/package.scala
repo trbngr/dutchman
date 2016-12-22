@@ -1,6 +1,6 @@
 package com.linktargeting.elasticsearch
 
-import com.linktargeting.elasticsearch.api.EsError
+import com.linktargeting.elasticsearch.api.ESError
 import com.linktargeting.elasticsearch.http.marshalling.{ApiMarshaller, ApiUnMarshaller}
 
 import scala.concurrent.Future
@@ -22,18 +22,18 @@ package object http {
   }
   case class Endpoint(host: String, port: Int)
 
-  trait EsRequestSigner {
+  trait ESRequestSigner {
     def sign(endpoint: Endpoint, request: Request): Request
   }
 
-  case object NullRequestSigner extends EsRequestSigner {
+  case object NullRequestSigner extends ESRequestSigner {
     override def sign(endpoint: Endpoint, request: Request) = request
   }
 
-  case class EsErrorsException(errors: Seq[EsError]) extends Exception(s"Elasticsearch exception: ${errors.map(e ⇒ e.status).mkString("\n")}")
+  case class ESErrorsException(errors: Seq[ESError]) extends Exception(s"Elasticsearch exception: ${errors.map(e ⇒ e.status).mkString("\n")}")
 
   trait HttpClient {
-    def execute[Json](endpoint: Endpoint, signer: EsRequestSigner)(request: Request)
+    def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)
                      (implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json]
   }
 }

@@ -20,20 +20,20 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   implicit val ec = system.dispatcher
   val logger = LoggerFactory.getLogger(getClass)
 
-  def execute[Json](endpoint: Endpoint, signer: EsRequestSigner)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
+  def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
     http.singleRequest(buildRequest(endpoint, signer, request)) flatMap { response =>
       response.entity.json { response ⇒
         logger.debug(s"ES Response: : $response")
         val json = response.parseJson
         json.readError match {
-          case Some(errors) ⇒ throw EsErrorsException(errors)
+          case Some(errors) ⇒ throw ESErrorsException(errors)
           case _ ⇒ json
         }
       }
     }
   }
 
-  private def buildRequest(endpoint: Endpoint, signer: EsRequestSigner, request: Request): HttpRequest = {
+  private def buildRequest(endpoint: Endpoint, signer: ESRequestSigner, request: Request): HttpRequest = {
     val signed = signer.sign(endpoint, request)
     val entity = HttpEntity(signed.payload)
     val uri = request.uri(endpoint)

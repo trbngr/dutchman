@@ -7,8 +7,8 @@ object query {
   object QueryTranslator extends DataTranslator[Query] {
     def data(query: Query) = {
       val options = query match {
-        case x: QueryLike ⇒ Map.empty ++ x.options.size.map("size" → _)
-        case _            ⇒ Map.empty[String, Any]
+        case x: QueryWithOptions ⇒ Map.empty ++ x.options.size.map("size" → _)
+        case _                   ⇒ Map.empty[String, Any]
       }
       val queryData = Map("query" → (query match {
         case x: PrefixQuery ⇒ PrefixQueryTranslator.data(x)

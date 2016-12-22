@@ -11,8 +11,8 @@ object marshalling {
 
   trait ApiUnMarshaller[Json] {
     def read(json: String): Json
-    def error(json: String): EsError
-    def readError(json: Json): Option[Seq[EsError]]
+    def error(json: String): ESError
+    def readError(json: Json): Option[Seq[ESError]]
 
     def index(json: Json): IndexResponse
     def deleteIndex(json: Json): DeleteIndexResponse

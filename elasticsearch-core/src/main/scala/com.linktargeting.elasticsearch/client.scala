@@ -1,9 +1,9 @@
 package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.api.translation.apiRequest
-import com.linktargeting.elasticsearch.http.{Endpoint, EsRequestSigner, HttpClient, NullRequestSigner}
-import com.linktargeting.elasticsearch.http.marshalling.{ApiMarshaller, ApiUnMarshaller}
+import com.linktargeting.elasticsearch.api.translation._
+import com.linktargeting.elasticsearch.http._
+import com.linktargeting.elasticsearch.http.marshalling._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,12 +30,12 @@ object client {
   }
 
   implicit class ClientSugar(client: HttpClient) {
-    def connect[Json](endpoint: Endpoint, signer: EsRequestSigner = NullRequestSigner)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): ESClient[Json] = {
+    def connect[Json](endpoint: Endpoint, signer: ESRequestSigner = NullRequestSigner)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): ESClient[Json] = {
       new ConnectedClient[Json](client, endpoint, signer)
     }
   }
 
-  final class ConnectedClient[Json](client: HttpClient, endpoint: Endpoint, signer: EsRequestSigner = NullRequestSigner)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json])
+  final class ConnectedClient[Json](client: HttpClient, endpoint: Endpoint, signer: ESRequestSigner = NullRequestSigner)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json])
     extends ESClient[Json]
       with DocumentApiClient[Json]
       with IndicesApiClient[Json] {

@@ -12,8 +12,8 @@ private[circe] object codecs {
   implicit val indexEncoder = deriveEncoder[Idx]
   implicit val idEncoder = deriveEncoder[Id]
   implicit val typeEncoder = deriveEncoder[Type]
-  implicit val errorEncoder = deriveEncoder[EsError]
-  implicit val errorDecoder = deriveDecoder[EsError]
+  implicit val errorEncoder = deriveEncoder[ESError]
+  implicit val errorDecoder = deriveDecoder[ESError]
 
   implicit val shardsEncoder = deriveEncoder[Shards]
   implicit val shardsDecoder = deriveDecoder[Shards]

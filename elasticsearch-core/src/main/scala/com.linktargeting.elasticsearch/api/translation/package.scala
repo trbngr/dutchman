@@ -38,8 +38,8 @@ package object translation {
     def request(op: A): Request
   }
 
-  trait EsDocument[A] {
-    def asDocument(a: A): Document
+  trait ESDocument[A] {
+    def document(a: A): Document
   }
 
 }

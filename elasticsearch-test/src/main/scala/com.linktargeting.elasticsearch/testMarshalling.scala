@@ -12,7 +12,7 @@ trait testMarshalling {
 
   implicit object unMarshaller extends ApiUnMarshaller[String]{
     override def read(json: String) = json
-    override def error(json: String) = EsError("" , "", "", 500)
+    override def error(json: String) = ESError("" , "", "", 500)
     override def index(json: String) = ???
     override def deleteIndex(json: String) = ???
     override def readError(json: String) = None

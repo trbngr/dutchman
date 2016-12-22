@@ -17,13 +17,15 @@ object search {
     }
 
     def request(api: SearchApi) = api match {
-      case x: Search      ⇒
+
+      case x: Search ⇒
         val path = x match {
           case Search(indices, types, _) if indices.isEmpty && types.isEmpty ⇒ "/_search"
           case Search(indices, types, _) if types.isEmpty                    ⇒ s"/${indices.map(_.name).mkString(",")}/_search"
           case Search(indices, types, _)                                     ⇒ s"/${indices.map(_.name).mkString(",")}/${types.map(_.name).mkString(",")}/_search"
         }
         Request(POST, path)
+
       case x: StartScroll ⇒ x match {
         case StartScroll(index, tpe, _, ttl) ⇒
           Request(POST,
@@ -31,7 +33,8 @@ object search {
             params = Map("scroll" → s"${ttl.toSeconds}s")
           )
       }
-      case x: Scroll      ⇒ x match {
+
+      case x: Scroll ⇒ x match {
         case Scroll(id, ttl) ⇒
           println(s"scroll_id: $id")
           Request(GET,
@@ -39,6 +42,7 @@ object search {
             params = Map("scroll_id" → id, "scroll" → s"${ttl.toSeconds}s")
           )
       }
+
       case x: ClearScroll ⇒ Request(DELETE, path = s"/_search/scroll")
     }
   }

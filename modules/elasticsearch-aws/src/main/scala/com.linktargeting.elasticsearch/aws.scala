@@ -12,10 +12,10 @@ import com.linktargeting.elasticsearch.http._
 
 object aws {
 
-  object AwsSigner {
+  object AWSSigner {
     val Algorithm = "AWS4-HMAC-SHA256"
-    def apply(credentials: AWSCredentials, region: String) = new AwsSigner(new AWSStaticCredentialsProvider(credentials), region, "es")
-    def apply(credentials: AWSCredentialsProvider, region: String): AwsSigner = new AwsSigner(credentials, region, "es")
+    def apply(credentials: AWSCredentials, region: String) = new AWSSigner(new AWSStaticCredentialsProvider(credentials), region, "es")
+    def apply(credentials: AWSCredentialsProvider, region: String): AWSSigner = new AWSSigner(credentials, region, "es")
   }
 
   implicit class RequestUrlBuilder(request: Request){
@@ -33,10 +33,10 @@ object aws {
     }
   }
 
-  final class AwsSigner(credentials: AWSCredentialsProvider, region: String, service: String)
-    extends EsRequestSigner {
+  final class AWSSigner(credentials: AWSCredentialsProvider, region: String, service: String)
+    extends ESRequestSigner {
 
-    import AwsSigner._
+    import AWSSigner._
 
     require(credentials.getCredentials != null, "credentials provider must return non null credentials.")
 

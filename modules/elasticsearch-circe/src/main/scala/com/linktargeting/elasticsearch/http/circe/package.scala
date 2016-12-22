@@ -61,7 +61,7 @@ package object circe {
     }
     def error(json: String) = {
       println(s"error: $json")
-      read(json).as[EsError].getOrElse(e("error"))
+      read(json).as[ESError].getOrElse(e("error"))
     }
     def index(json: Json) = {
       IndexResponse(

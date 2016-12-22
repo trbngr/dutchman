@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "2.4.2",
+  version := "2.4.3",
   organization := "com.linktargeting.elasticsearch",
   name := "Elasticsearch Http Client for Scala",
   scalaVersion := "2.12.1",
