@@ -7,13 +7,17 @@ import akka.http.scaladsl.model.headers._
 import akka.stream.Materializer
 import akka.util.ByteString
 import com.linktargeting.elasticsearch.http._
-import marshalling._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
+object AkkaHttpClient {
+  def apply()(implicit system: ActorSystem, mat: Materializer): AkkaHttpClient = new AkkaHttpClient()
+}
+
 class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extends http.HttpClient {
 
+  import marshalling._
   import marshalling.syntax._
 
   val http = Http(system)
@@ -23,11 +27,11 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
     http.singleRequest(buildRequest(endpoint, signer, request)) flatMap { response =>
       response.entity.json { response ⇒
-        logger.debug(s"ES Response: : $response")
         val json = response.parseJson
+        logger.debug(s"ES Response: : $json")
         json.readError match {
           case Some(errors) ⇒ throw ESErrorsException(errors)
-          case _ ⇒ json
+          case _            ⇒ json
         }
       }
     }
@@ -39,9 +43,8 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     val uri = request.uri(endpoint)
     val unauthed = HttpRequest(method = request.verb, uri = uri, entity = entity)
 
-//    println(s"request: $uri")
-//    println(s"method: ${unauthed.method}")
-//    println(s"payload: ${signed.payload}")
+    logger.debug(s"request: ${unauthed.method} $uri")
+    logger.debug(s"payload: ${signed.payload}")
 
     val hostHeader = request.headers.find(_.name == "Host").map(x ⇒ Host(x.value))
     val headers = request.headers.filterNot(_.name == "Host").map(x ⇒ RawHeader(x.name, x.value)) ++ hostHeader

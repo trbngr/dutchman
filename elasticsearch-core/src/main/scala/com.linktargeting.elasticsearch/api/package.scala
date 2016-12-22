@@ -3,6 +3,7 @@ package com.linktargeting.elasticsearch
 import scala.concurrent.duration._
 
 package object api {
+
   import translation._
 
   sealed trait Api
@@ -18,9 +19,14 @@ package object api {
   case class Response(shards: Shards, index: String, `type`: String, id: String, version: Int)
   case class ESError(index: String, `type`: String, id: String, status: Int)
 
-  case class Id(value: String)
-  case class Idx(name: String)
-  case class Type(name: String)
+  final case class Id(value: String)
+
+  object Idx {
+    def apply(name: String): Idx = new Idx(name.toLowerCase())
+  }
+  final class Idx(val name: String)
+
+  final case class Type(name: String)
 
   //document api
   case class Document(id: Id, data: Map[String, Any])
@@ -61,6 +67,7 @@ package object api {
 
   object Refresh {
     def apply(index: Idx): Refresh = Refresh(Seq(index))
+
     def apply(): Refresh = Refresh(Seq.empty)
   }
   case class Refresh(indices: Seq[Idx]) extends IndicesApi
@@ -86,10 +93,16 @@ package object api {
   case class StartScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi
   case class Scroll(scrollId: String, ttl: FiniteDuration = 1 minute) extends SearchApi
 
-  object ClearScroll{
+  object ClearScroll {
     def apply(scrollId: String): ClearScroll = ClearScroll(Set(scrollId))
   }
   case class ClearScroll(scrollIds: Set[String]) extends SearchApi
 
   case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json])
+
+  implicit def stringToId(s: String): Id = Id(s)
+  implicit def stringToIdx(s: String): Idx = Idx(s)
+  implicit def stringsToIndices(s: Seq[String]): Seq[Idx] = s.map(stringToIdx)
+  implicit def stringToType(s: String): Type = Type(s)
+  implicit def stringsToTypes(s: Seq[String]): Seq[Type] = s.map(stringToType)
 }

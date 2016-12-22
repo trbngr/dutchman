@@ -11,14 +11,21 @@ object marshalling {
 
   trait ApiUnMarshaller[Json] {
     def read(json: String): Json
+
     def error(json: String): ESError
+
     def readError(json: Json): Option[Seq[ESError]]
 
     def index(json: Json): IndexResponse
+
     def deleteIndex(json: Json): DeleteIndexResponse
+
     def bulk(json: Json): Seq[BulkResponse]
+
     def search(json: Json): SearchResponse[Json]
+
     def refresh(json: Json): RefreshResponse
+
     def scroll(json: Json): ScrollResponse[Json]
   }
 
@@ -40,10 +47,7 @@ object marshalling {
       def response(json: Json) = u.deleteIndex(json)
     }
     implicit class BulkResponseSyntax[Json](api: Bulk)(implicit u: ApiUnMarshaller[Json]) {
-      def response(json: Json) = {
-        println(s"bulk: $json")
-        u.bulk(json)
-      }
+      def response(json: Json) = u.bulk(json)
     }
     implicit class SearchResponseSyntax[Json](api: Search)(implicit u: ApiUnMarshaller[Json]) {
       def response(json: Json) = u.search(json)
@@ -52,10 +56,7 @@ object marshalling {
       def response(json: Json) = u.refresh(json)
     }
     implicit class StartScrollResponseSyntax[Json](api: StartScroll)(implicit u: ApiUnMarshaller[Json]) {
-      def response(json: Json) = {
-        println(s"StartScrollResponseSyntax: $json")
-        u.scroll(json)
-      }
+      def response(json: Json) = u.scroll(json)
     }
     implicit class ScrollResponseSyntax[Json](api: Scroll)(implicit u: ApiUnMarshaller[Json]) {
       def response(json: Json) = u.scroll(json)

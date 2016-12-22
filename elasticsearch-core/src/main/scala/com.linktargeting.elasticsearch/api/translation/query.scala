@@ -19,8 +19,8 @@ object query {
 
   private[translation] object PrefixQueryTranslator extends DataTranslator[PrefixQuery] {
     override def data(x: PrefixQuery) = x match {
-      case PrefixQuery(field, value, boost, _) if boost > 0 ⇒ Map("prefix" → Map(field → Map("value" → value, "boost" → boost)))
-      case PrefixQuery(field, value, _, _)                  ⇒ Map("prefix" → Map(field -> value))
+      case PrefixQuery(field, value, boost, _) if boost > 0 ⇒ Map("prefix" → Map(field → Map("value" → value.toLowerCase(), "boost" → boost)))
+      case PrefixQuery(field, value, _, _)                  ⇒ Map("prefix" → Map(field -> value.toLowerCase()))
     }
   }
 }

@@ -24,7 +24,8 @@ object search {
           case Search(indices, types, _) if types.isEmpty                    ⇒ s"/${indices.map(_.name).mkString(",")}/_search"
           case Search(indices, types, _)                                     ⇒ s"/${indices.map(_.name).mkString(",")}/${types.map(_.name).mkString(",")}/_search"
         }
-        Request(POST, path)
+        val params = if (x.indices.size > 1) Map("ignore_unavailable" → "true") else Map.empty[String, String]
+        Request(POST, path, params)
 
       case x: StartScroll ⇒ x match {
         case StartScroll(index, tpe, _, ttl) ⇒
