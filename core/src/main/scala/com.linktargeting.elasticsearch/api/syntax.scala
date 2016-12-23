@@ -8,11 +8,8 @@ trait syntax extends querySyntax {
 
   class Syntax[Json, Response](f: ⇒ Future[Response])(implicit ec: ExecutionContext) {
     def apply(): Future[Response] = f
-
     def task: Future[Response] = f
-
     def map[That](fx: Response ⇒ That): Future[That] = f map fx
-
     def flatMap[That](fx: Response ⇒ Future[That]): Future[That] = f flatMap fx
   }
 
