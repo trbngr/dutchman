@@ -6,13 +6,17 @@ import com.linktargeting.elasticsearch.api.translation._
 import com.linktargeting.elasticsearch.marshalling._
 import io.circe._
 import io.circe.parser._
+import org.slf4j.LoggerFactory
 
 package object circe {
 
+  private val log = LoggerFactory.getLogger(getClass)
+
   implicit object CirceMarshaller extends ApiMarshaller {
+
     import translation.apiData
 
-    def stringify(api: Api) = {
+    def marshal(api: Api) = {
       api match {
         case bulk: Bulk ⇒
           val containers = apiData(bulk).get("actions") collect {
@@ -30,7 +34,7 @@ package object circe {
   implicit class RichStringMap(map: DataContainer) {
     def toJson = {
       val json = createJson(map)
-      println(json)
+      log.debug(s"payload: $json")
       json.noSpaces
     }
 
@@ -57,9 +61,9 @@ package object circe {
     private def e(op: String) = throw DecodingError(s"Invalid response: $op")
 
     def read(json: String) = {
-      val j = parse(json).getOrElse(Json.Null)
-      //      println(j)
-      j
+      val response = parse(json).getOrElse(Json.Null)
+      log.debug(s"response: $response")
+      response
     }
     def error(json: String) = {
       println(s"error: $json")

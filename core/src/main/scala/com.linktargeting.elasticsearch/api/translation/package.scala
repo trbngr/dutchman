@@ -18,10 +18,15 @@ package object translation {
     case v: SearchApi   ⇒ SearchApiTranslator.data(v)
   }
 
-  def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = api match {
-    case v: DocumentApi ⇒ DocumentApiTranslator.request(v)
-    case v: IndicesApi  ⇒ IndicesApiTranslator.request(v)
-    case v: SearchApi   ⇒ SearchApiTranslator.request(v)
+  def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = {
+    val request = api match {
+      case v: DocumentApi ⇒ DocumentApiTranslator.request(v)
+      case v: IndicesApi  ⇒ IndicesApiTranslator.request(v)
+      case v: SearchApi   ⇒ SearchApiTranslator.request(v)
+    }
+    request.copy(
+      payload = marshaller.marshal(api)
+    )
   }
 
   trait DataTranslator[A] {

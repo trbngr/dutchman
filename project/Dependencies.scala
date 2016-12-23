@@ -10,6 +10,7 @@ object Dependencies {
     val awsSdkCore = "1.11.66"
     val json4s = "3.5.0"
     val elasticsearch = "2.4.3"
+    val slf4j = "1.7.16"
   }
 
   private def akkaModule(module: String, version: String = Version.akka) = "com.typesafe.akka" %% s"akka-$module" % version
@@ -19,6 +20,7 @@ object Dependencies {
   val akkaStream = akkaModule("stream")
   val akkaTestKit = akkaModule("testkit") % "test"
   val akkaHttp = akkaModule("http", "10.0.0")
+  val slf4j = "org.slf4j" % "slf4j-api" % Version.slf4j
 
   val logback = "ch.qos.logback" % "logback-classic" % Version.logback
   val logbackJackson = "co.wrisk.logback" % "logback-ext-jackson" % "1.0.3"

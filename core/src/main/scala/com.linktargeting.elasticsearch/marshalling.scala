@@ -6,7 +6,7 @@ object marshalling {
   case class DecodingError(message: String) extends Exception(s"Error decoding json: $message")
 
   trait ApiMarshaller {
-    def stringify(api: Api): String
+    def marshal(api: Api): String
   }
 
   trait ApiUnMarshaller[Json] {

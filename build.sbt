@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.61",
+  version := "0.5.64",
   organization := "com.linktargeting.elasticsearch",
   name := "Elasticsearch Http Client for Scala",
   scalaVersion := "2.11.8",
@@ -40,7 +40,7 @@ lazy val core = project.in(file("core"))
   .settings(publishSettings: _*)
   .settings(
     moduleName := "elasticsearch-core",
-    libraryDependencies ++= Seq()
+    libraryDependencies ++= Seq(slf4j)
   )
 
 lazy val test = project.in(file("test"))
@@ -77,7 +77,7 @@ lazy val circe = project.in(file("circe"))
   .settings(
     moduleName := "elasticsearch-circe",
     libraryDependencies ++= Dependencies.circe,
-    libraryDependencies ++= Seq(scalaTest % "test")
+    libraryDependencies ++= Seq(slf4j, scalaTest % "test")
   )
   .dependsOn(core, test % "test")
   .settings(publishSettings: _*)

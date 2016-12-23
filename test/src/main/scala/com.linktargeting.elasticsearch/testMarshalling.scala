@@ -7,7 +7,7 @@ object testMarshalling extends testMarshalling
 
 trait testMarshalling {
   implicit object marshaller extends ApiMarshaller {
-    override def stringify(api: Api) = ""
+    override def marshal(api: Api) = ""
   }
 
   implicit object unMarshaller extends ApiUnMarshaller[String]{
