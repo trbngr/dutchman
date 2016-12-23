@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.48",
+  version := "0.5.53",
   organization := "com.linktargeting.elasticsearch",
   name := "Elasticsearch Http Client for Scala",
   scalaVersion := "2.11.8",
@@ -35,7 +35,7 @@ lazy val root = project.in(file("."))
   )
   .aggregate(core, aws, circe, test, akka)
 
-lazy val core = project.in(file("elasticsearch-core"))
+lazy val core = project.in(file("core"))
   .settings(buildSettings: _*)
   .settings(publishSettings: _*)
   .settings(
@@ -43,7 +43,7 @@ lazy val core = project.in(file("elasticsearch-core"))
     libraryDependencies ++= Seq()
   )
 
-lazy val test = project.in(file("elasticsearch-test"))
+lazy val test = project.in(file("test"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "elasticsearch-test",
@@ -53,7 +53,7 @@ lazy val test = project.in(file("elasticsearch-test"))
   )
   .dependsOn(core)
 
-lazy val akka = project.in(file("modules/elasticsearch-akka"))
+lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "elasticsearch-akka",
@@ -62,7 +62,7 @@ lazy val akka = project.in(file("modules/elasticsearch-akka"))
   .dependsOn(core, test % "test", circe % "test")
   .settings(publishSettings: _*)
 
-lazy val aws = project.in(file("modules/elasticsearch-aws"))
+lazy val aws = project.in(file("aws"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "elasticsearch-aws",
@@ -72,7 +72,7 @@ lazy val aws = project.in(file("modules/elasticsearch-aws"))
   .dependsOn(core)
   .settings(publishSettings: _*)
 
-lazy val circe = project.in(file("modules/elasticsearch-circe"))
+lazy val circe = project.in(file("circe"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "elasticsearch-circe",
