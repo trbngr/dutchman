@@ -25,10 +25,9 @@ package object elasticsearch {
     def sign(endpoint: Endpoint, request: Request): Request
   }
 
-  case object NullRequestSigner extends ESRequestSigner {
-    override def sign(endpoint: Endpoint, request: Request) = request
+  object NullRequestSigner extends ESRequestSigner {
+    def sign(endpoint: Endpoint, request: Request) = request
   }
-
 
   trait HttpClient {
     def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)

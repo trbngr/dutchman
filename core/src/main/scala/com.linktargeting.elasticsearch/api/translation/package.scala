@@ -12,26 +12,16 @@ package object translation {
   type DataContainer = Map[String, Any]
   type BulkContainers = Seq[DataContainer]
 
-  def apiData(api: Api): DataContainer = ApiTranslator.data(api)
-
-  def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = {
-    ApiTranslator.request(api).copy(
-      payload = marshaller.stringify(api)
-    )
+  def apiData(api: Api): DataContainer = api match {
+    case v: DocumentApi ⇒ DocumentApiTranslator.data(v)
+    case v: IndicesApi  ⇒ IndicesApiTranslator.data(v)
+    case v: SearchApi   ⇒ SearchApiTranslator.data(v)
   }
 
-  private[this] implicit object ApiTranslator extends DataTranslator[Api] with RequestTranslator[Api] {
-    def data(api: Api) = api match {
-      case v: DocumentApi ⇒ DocumentApiTranslator.data(v)
-      case v: IndicesApi  ⇒ IndicesApiTranslator.data(v)
-      case v: SearchApi   ⇒ SearchApiTranslator.data(v)
-    }
-
-    def request(api: Api) = api match {
-      case v: DocumentApi ⇒ DocumentApiTranslator.request(v)
-      case v: IndicesApi  ⇒ IndicesApiTranslator.request(v)
-      case v: SearchApi   ⇒ SearchApiTranslator.request(v)
-    }
+  def apiRequest(api: Api)(implicit marshaller: ApiMarshaller): Request = api match {
+    case v: DocumentApi ⇒ DocumentApiTranslator.request(v)
+    case v: IndicesApi  ⇒ IndicesApiTranslator.request(v)
+    case v: SearchApi   ⇒ SearchApiTranslator.request(v)
   }
 
   trait DataTranslator[A] {
