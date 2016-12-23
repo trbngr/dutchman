@@ -5,7 +5,6 @@ import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.linktargeting.elasticsearch.AkkaHttpClient
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.model._
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.concurrent.ScalaFutures

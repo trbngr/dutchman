@@ -2,6 +2,7 @@ package com.linktargeting.elasticsearch.search
 
 import com.linktargeting.elasticsearch.ApiSpecs
 import com.linktargeting.elasticsearch.api._
+import com.linktargeting.elasticsearch.dsl._
 import com.linktargeting.elasticsearch.model._
 
 import scala.concurrent.ExecutionContext.Implicits.global

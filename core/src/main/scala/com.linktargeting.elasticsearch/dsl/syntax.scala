@@ -1,10 +1,10 @@
-package com.linktargeting.elasticsearch.api
+package com.linktargeting.elasticsearch.dsl
 
-import com.linktargeting.elasticsearch.dsl.Dsl
+import com.linktargeting.elasticsearch.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait syntax extends querySyntax {
+trait syntax {
 
   class Syntax[Json, Response](f: ⇒ Future[Response])(implicit ec: ExecutionContext) {
     def apply(): Future[Response] = f
@@ -49,7 +49,4 @@ trait syntax extends querySyntax {
   implicit class ClearScrollSyntax[Json](api: ClearScroll)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends Syntax[Json, Unit](client.search(api))
 
-}
-
-trait querySyntax {
 }

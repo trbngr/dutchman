@@ -1,13 +1,12 @@
 package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.api.translation._
-import com.linktargeting.elasticsearch._
-import marshalling._
+import com.linktargeting.elasticsearch.api.translation.apiRequest
+import com.linktargeting.elasticsearch.marshalling.{ApiMarshaller, ApiUnMarshaller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object dsl {
+package object dsl extends syntax {
   trait Dsl[Json] {
     val document: DocumentApiClient[Json]
     val indices: IndicesApiClient[Json]

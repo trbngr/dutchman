@@ -2,7 +2,7 @@ package com.linktargeting.elasticsearch
 
 import scala.concurrent.duration._
 
-package object api extends syntax with search {
+package object api extends search {
 
   import translation._
 

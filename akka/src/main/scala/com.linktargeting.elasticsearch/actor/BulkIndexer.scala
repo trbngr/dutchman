@@ -4,8 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.dsl._
-import com.linktargeting.elasticsearch.marshalling.ApiMarshaller
-import com.linktargeting.elasticsearch.util.InstrumentationContext
+import com.linktargeting.elasticsearch.marshalling._
 
 import scala.collection.immutable.Queue
 
@@ -56,38 +55,34 @@ class BulkIndexer[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit v
 
   def flush(force: Boolean = false) = {
     if ((force || queue.size == config.maxDocuments) && queue.nonEmpty) {
-      val ctx = new InstrumentationContext
 
-      val api = ctx.measure("build_api") {
-        Bulk(queue.map {
-          case (action, docApi, _) ⇒ action → docApi
-        }: _*)
-      }
+      val api = Bulk(queue.map {
+        case (action, docApi, _) ⇒ action → docApi
+      }: _*)
+
       val bulkSession = queue
       queue = Queue.empty[(BulkAction, SingleDocumentApi, ActorRef)]
 
-      ctx.measure("send_request") {
-        val json = translation.apiRequest(api).payload
-        val payloadSizeInMb = json.length / 1024.0 / 1024
+      val json = translation.apiRequest(api).payload
+      val payloadSizeInMb = json.length / 1024.0 / 1024
 
-        log.info(f"Flushing ${api.actions.size} messages ($payloadSizeInMb%.2fMB).")
+      log.info(f"Flushing ${api.actions.size} messages ($payloadSizeInMb%.2fMB).")
 
-        client.document(api) map { response ⇒
-          log.info(f"Flushed ${response.size} messages ($payloadSizeInMb%.2fMB). $ctx")
-          if (response.size == bulkSession.size) {
-            IndexingSuccessful(response.zip(bulkSession) map {
-              case (bulkResponse, (action, docApi, replyTo)) => (action, docApi, bulkResponse, replyTo)
-            })
-          } else {
-            log.error(s"Number of responses ${response.size} != requests(${bulkSession.length}). $ctx")
-            IndexingFailure("Response count mismatch.", bulkSession)
-          }
-        } recover {
-          case e: Throwable =>
-            log.error(s"Failed to flush ${bulkSession.size} messages. $ctx", e)
-            IndexingFailure(e.getMessage, bulkSession)
-        } pipeTo self
-      }
+      client.document(api) map { response ⇒
+        log.info(f"Flushed ${response.size} messages ($payloadSizeInMb%.2fMB).")
+        if (response.size == bulkSession.size) {
+          IndexingSuccessful(response.zip(bulkSession) map {
+            case (bulkResponse, (action, docApi, replyTo)) => (action, docApi, bulkResponse, replyTo)
+          })
+        } else {
+          log.error(s"Number of responses ${response.size} != requests(${bulkSession.length}).")
+          IndexingFailure("Response count mismatch.", bulkSession)
+        }
+      } recover {
+        case e: Throwable =>
+          log.error(s"Failed to flush ${bulkSession.size} messages.", e)
+          IndexingFailure(e.getMessage, bulkSession)
+      } pipeTo self
     }
   }
 }
