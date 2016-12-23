@@ -6,7 +6,6 @@ import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.linktargeting.elasticsearch.AkkaHttpClient
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.dsl._
-import com.linktargeting.elasticsearch.http.{Endpoint, circe}
 import com.linktargeting.elasticsearch.model._
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.concurrent.ScalaFutures
@@ -22,8 +21,6 @@ class BulkIndexerSpecs extends TestKit(ActorSystem("BulkIndexerSpecs"))
   with Matchers
   with ScalaFutures
   with BeforeAndAfterAll {
-
-  import circe._
 
   implicit val ec = system.dispatcher
   implicit val mat = ActorMaterializer()

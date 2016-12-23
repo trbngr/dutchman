@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import cats.syntax.either._
-import com.linktargeting.elasticsearch.http.circe._
 import marshalling._
 import com.linktargeting.elasticsearch.model._
 import io.circe.Json

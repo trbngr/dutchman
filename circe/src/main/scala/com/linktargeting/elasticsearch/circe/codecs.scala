@@ -1,4 +1,4 @@
-package com.linktargeting.elasticsearch.http.circe
+package com.linktargeting.elasticsearch.circe
 
 import cats.syntax.either._
 import com.linktargeting.elasticsearch.api._

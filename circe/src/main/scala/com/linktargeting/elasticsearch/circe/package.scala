@@ -1,4 +1,4 @@
-package com.linktargeting.elasticsearch.http
+package com.linktargeting.elasticsearch
 
 import cats.syntax.either._
 import com.linktargeting.elasticsearch.api._
@@ -51,8 +51,8 @@ package object circe {
 
   implicit object CirceUnmarshaller extends ApiUnMarshaller[Json] {
 
-    import circe.codecs._
-    import circe.syntax._
+    import codecs._
+    import syntax._
 
     private def e(op: String) = throw DecodingError(s"Invalid response: $op")
 
