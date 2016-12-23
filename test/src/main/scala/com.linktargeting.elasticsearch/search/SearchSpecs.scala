@@ -33,7 +33,8 @@ trait SearchSpecs[Json] {
       "work" in {
         whenReady(indexPeople) { _ ⇒
           try {
-            Search(idx, tpe, Prefix("name", "even")) map { response ⇒
+            val opts = SearchOptions(size = Some(25))
+            Search(idx, tpe, Prefix("name", "even")).withOptions(opts) map { response ⇒
               response.total shouldBe 5
               val persons = response.documents.map(x ⇒ readPerson(x.source))
               persons.size shouldBe 5

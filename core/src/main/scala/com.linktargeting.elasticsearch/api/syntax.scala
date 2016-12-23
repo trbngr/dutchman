@@ -4,12 +4,20 @@ import com.linktargeting.elasticsearch.dsl.Dsl
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait syntax extends querySyntax{
+trait syntax extends querySyntax {
 
-  class Syntax[Json, A <: Api, B](f: ⇒ Future[B])(implicit ec: ExecutionContext) {
-    def apply() = f
-    def task = f
-    def map[C](fx: B ⇒ C) = f map fx
+  class Syntax[Json, This <: Api, Response](f: ⇒ Future[Response])(implicit ec: ExecutionContext) {
+    def apply(): Future[Response] = f
+
+    def task: Future[Response] = f
+
+    def map[That](fx: Response ⇒ That): Future[That] = f map fx
+
+    def flatMap[That](fx: Response ⇒ Future[That]): Future[That] = f flatMap fx
+  }
+
+  trait QueryOptionProvider[A <: SearchApiWithOptions] {
+    def withOptions(options: SearchOptions): A
   }
 
   implicit class IndexSyntax[Json](api: Index)(implicit client: Dsl[Json], ec: ExecutionContext)
@@ -25,17 +33,21 @@ trait syntax extends querySyntax{
     extends Syntax[Json, Refresh, RefreshResponse](client.indices(api))
 
   implicit class SearchSyntax[Json](api: Search)(implicit client: Dsl[Json], ec: ExecutionContext)
-    extends Syntax[Json, Search, SearchResponse[Json]](client.search(api)) {
-    def options[C](options: QueryOptions)(fx: SearchResponse[Json] ⇒ C) = client.search(api, options)
+    extends Syntax[Json, Search, SearchResponse[Json]](client.search(api)) with QueryOptionProvider[Search] {
+    def withOptions(options: SearchOptions) = api.copy(
+      query = QueryWithOptions(api.query, options)
+    )
+  }
+
+  implicit class StartScrollSyntax[Json](api: StartScroll)(implicit client: Dsl[Json], ec: ExecutionContext)
+    extends Syntax[Json, StartScroll, ScrollResponse[Json]](client.search(api)) with QueryOptionProvider[StartScroll] {
+    def withOptions(options: SearchOptions) = api.copy(
+      query = QueryWithOptions(api.query, options)
+    )
   }
 
   implicit class ScrollSyntax[Json](api: Scroll)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends Syntax[Json, Scroll, ScrollResponse[Json]](client.search(api))
-
-  implicit class StartScrollSyntax[Json](api: StartScroll)(implicit client: Dsl[Json], ec: ExecutionContext)
-    extends Syntax[Json, StartScroll, ScrollResponse[Json]](client.search(api)) {
-    def options[C](options: QueryOptions)(fx: ScrollResponse[Json] ⇒ C) = client.search(api, options)
-  }
 
   implicit class ClearScrollSyntax[Json](api: ClearScroll)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends Syntax[Json, ClearScroll, Unit](client.search(api))

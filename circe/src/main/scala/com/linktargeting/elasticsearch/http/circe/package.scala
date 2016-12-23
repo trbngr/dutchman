@@ -28,7 +28,11 @@ package object circe {
   }
 
   implicit class RichStringMap(map: DataContainer) {
-    def toJson = createJson(map).noSpaces
+    def toJson = {
+      val json = createJson(map)
+      println(json)
+      json.noSpaces
+    }
 
     private def createJson(value: Any): Json = value match {
       case v: String      ⇒ Json.fromString(v)

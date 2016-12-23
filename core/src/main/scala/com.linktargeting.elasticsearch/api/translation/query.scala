@@ -6,12 +6,7 @@ object query {
 
   object QueryTranslator extends DataTranslator[Query] {
     def data(query: Query) = {
-      val options: DataContainer = query match {
-        case QueryWithOptions(_, opts) ⇒ QueryOptionsTranslator.data(opts)
-        case _                         ⇒ Map.empty[String, Any]
-      }
-
-      val queryData: DataContainer = query match {
+      query match {
         case QueryWithOptions(q, _) ⇒ QueryTranslator.data(q)
 
         case x: Prefix ⇒ x match {
@@ -26,14 +21,6 @@ object query {
           case (MustNot, queries) ⇒ Map("must_not" → queries.map(QueryTranslator.data))
         }.toMap)
       }
-
-      queryData ++ options
-    }
-  }
-
-  private[translation] object QueryOptionsTranslator extends DataTranslator[QueryOptions] {
-    override def data(x: QueryOptions) = {
-      Map.empty[String, Any] ++ x.size.map("size" → _)
     }
   }
 }

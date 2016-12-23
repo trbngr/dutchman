@@ -18,9 +18,10 @@ trait ApiSpecs[Json]
     with BeforeAndAfterEach
     //    with IndexSpecs[Json]
     //    with BulkSpecs[Json]
-    //    with SearchSpecs[Json]
+        with SearchSpecs[Json]
     //    with ScrollSpecs[Json]
-    with BoolSpecs[Json] {
+//    with BoolSpecs[Json]
+{
 
   val tpe = Type("person")
 

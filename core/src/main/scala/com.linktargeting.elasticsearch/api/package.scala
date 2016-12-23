@@ -2,7 +2,7 @@ package com.linktargeting.elasticsearch
 
 import scala.concurrent.duration._
 
-package object api extends syntax {
+package object api extends syntax with search {
 
   import translation._
 
@@ -14,6 +14,9 @@ package object api extends syntax {
   sealed trait SearchApi extends Api
 
   sealed trait Query
+  sealed trait SearchApiWithOptions{
+    val query: Query
+  }
 
   sealed trait BoolQueryClause {
     def apply(queries: Query*): (BoolQueryClause, Seq[Query]) = this → queries.toSeq
@@ -56,11 +59,10 @@ package object api extends syntax {
 
   object Bulk {
     def apply(c: Index, create: Boolean = false): (BulkAction, SingleDocumentApi) = (if (create) BulkCreate else BulkIndex) → c
-
     def apply(c: Update): (BulkAction, SingleDocumentApi) = BulkUpdate → c
-
     def apply(c: Delete): (BulkAction, SingleDocumentApi) = BulkDelete → c
   }
+
   case class Bulk(actions: (BulkAction, SingleDocumentApi)*) extends DocumentApi
 
   case class BulkResponse(action: BulkAction, status: Int, response: Response)
@@ -80,8 +82,7 @@ package object api extends syntax {
   case class RefreshResponse(shards: Shards)
 
   //search api
-  case class QueryOptions(size: Option[Int] = None)
-  case class QueryWithOptions(query: Query, options: QueryOptions) extends Query
+  case class QueryWithOptions(query: Query, options: SearchOptions) extends Query
 
   case class Prefix(field: String, value: String, boost: Float = 0) extends Query
 
@@ -98,12 +99,12 @@ package object api extends syntax {
 
     def apply(index: Idx, types: Seq[Type], query: Query): Search = new Search(Seq(index), types, query)
   }
-  case class Search(indices: Seq[Idx], types: Seq[Type], query: Query) extends SearchApi
+  case class Search(indices: Seq[Idx], types: Seq[Type], query: Query) extends SearchApi with SearchApiWithOptions
 
   case class JsonDocument[Json](index: Idx, `type`: Type, id: Id, score: Float, source: Json)
   case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]])
 
-  case class StartScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi
+  case class StartScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi with SearchApiWithOptions
   case class Scroll(scrollId: String, ttl: FiniteDuration = 1 minute) extends SearchApi
 
   object ClearScroll {

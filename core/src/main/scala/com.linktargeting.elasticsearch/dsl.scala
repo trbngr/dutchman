@@ -17,8 +17,8 @@ object dsl {
   trait SearchApi[Json] {
     def apply(api: Search): Future[SearchResponse[Json]]
     def apply(api: StartScroll): Future[ScrollResponse[Json]]
-    def apply(api: Search, options: QueryOptions): Future[SearchResponse[Json]]
-    def apply(api: StartScroll, options: QueryOptions): Future[ScrollResponse[Json]]
+    def apply(api: Search, options: SearchOptions): Future[SearchResponse[Json]]
+    def apply(api: StartScroll, options: SearchOptions): Future[ScrollResponse[Json]]
     def apply(api: Scroll): Future[ScrollResponse[Json]]
     def apply(api: ClearScroll): Future[Unit]
   }
@@ -60,9 +60,9 @@ object dsl {
     def apply(api: Scroll): Future[ScrollResponse[Json]] = exe(api, unMarshaller.scroll)
     def apply(api: ClearScroll): Future[Unit] = exe(api, _ ⇒ ())
 
-    def apply(api: Search): Future[SearchResponse[Json]] = apply(api, QueryOptions())
-    def apply(api: StartScroll): Future[ScrollResponse[Json]] = apply(api, QueryOptions())
-    def apply(api: Search, options: QueryOptions): Future[SearchResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.search)
-    def apply(api: StartScroll, options: QueryOptions): Future[ScrollResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.scroll)
+    def apply(api: Search): Future[SearchResponse[Json]] = exe(api, unMarshaller.search)
+    def apply(api: StartScroll): Future[ScrollResponse[Json]] = exe(api, unMarshaller.scroll)
+    def apply(api: Search, options: SearchOptions): Future[SearchResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.search)
+    def apply(api: StartScroll, options: SearchOptions): Future[ScrollResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.scroll)
   }
 }
