@@ -1,7 +1,7 @@
 package com.linktargeting.elasticsearch.api
 
-import com.linktargeting.elasticsearch.http._
-import com.linktargeting.elasticsearch.http.marshalling.ApiMarshaller
+import com.linktargeting.elasticsearch._
+import com.linktargeting.elasticsearch.marshalling.ApiMarshaller
 
 package object translation {
 

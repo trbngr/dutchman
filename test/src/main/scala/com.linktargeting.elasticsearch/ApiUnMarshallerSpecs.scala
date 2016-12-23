@@ -1,6 +1,6 @@
 package com.linktargeting.elasticsearch
 
-import com.linktargeting.elasticsearch.http.marshalling._
+import marshalling._
 import com.linktargeting.elasticsearch.model._
 import org.scalatest.{FlatSpec, Matchers}
 

@@ -1,7 +1,7 @@
 package com.linktargeting.elasticsearch.api.translation
 
+import com.linktargeting.elasticsearch._
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.http._
 
 object document {
 

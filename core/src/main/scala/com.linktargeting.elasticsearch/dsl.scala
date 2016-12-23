@@ -2,8 +2,8 @@ package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.api.translation._
-import com.linktargeting.elasticsearch.http._
-import com.linktargeting.elasticsearch.http.marshalling._
+import com.linktargeting.elasticsearch._
+import marshalling._
 
 import scala.concurrent.{ExecutionContext, Future}
 

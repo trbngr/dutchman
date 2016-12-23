@@ -1,11 +1,10 @@
-package com.linktargeting.elasticsearch
+package com.linktargeting
 
-import com.linktargeting.elasticsearch.api.ESError
-import com.linktargeting.elasticsearch.http.marshalling.{ApiMarshaller, ApiUnMarshaller}
+import com.linktargeting.elasticsearch.marshalling._
 
 import scala.concurrent.Future
 
-package object http {
+package object elasticsearch {
   sealed trait Verb
   case object GET extends Verb
   case object HEAD extends Verb
@@ -30,7 +29,6 @@ package object http {
     override def sign(endpoint: Endpoint, request: Request) = request
   }
 
-  case class ESErrorsException(errors: Seq[ESError]) extends Exception(s"Elasticsearch exception: ${errors.map(e ⇒ e.status).mkString("\n")}")
 
   trait HttpClient {
     def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)

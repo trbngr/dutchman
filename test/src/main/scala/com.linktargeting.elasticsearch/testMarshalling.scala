@@ -1,7 +1,7 @@
 package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
-import com.linktargeting.elasticsearch.http.marshalling._
+import marshalling._
 
 object testMarshalling extends testMarshalling
 

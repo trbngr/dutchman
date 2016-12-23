@@ -6,10 +6,9 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 trait HttpClientSpecs extends FlatSpecLike with Matchers with ScalaFutures with JsonLoader {
 
-  import http._
   import testMarshalling._
 
-  val httpClient: http.HttpClient
+  val httpClient: HttpClient
 
   implicit val patience = PatienceConfig(timeout = scaled(Span(10, Seconds)), interval = scaled(Span(50, Millis)))
 

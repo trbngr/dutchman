@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import cats.syntax.either._
 import com.linktargeting.elasticsearch.http.circe._
-import com.linktargeting.elasticsearch.http.marshalling._
+import marshalling._
 import com.linktargeting.elasticsearch.model._
 import io.circe.Json
 import io.circe.generic.semiauto._

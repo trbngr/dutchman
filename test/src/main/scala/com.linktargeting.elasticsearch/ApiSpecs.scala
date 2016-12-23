@@ -2,7 +2,6 @@ package com.linktargeting.elasticsearch
 
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.dsl._
-import com.linktargeting.elasticsearch.http._
 import com.linktargeting.elasticsearch.model.Person
 import com.linktargeting.elasticsearch.search._
 import org.scalatest.concurrent.ScalaFutures
@@ -27,7 +26,7 @@ trait ApiSpecs[Json]
 
   def readPerson(json: Json): Person
 
-  val httpClient: http.HttpClient
+  val httpClient: HttpClient
   implicit val marshaller: marshalling.ApiMarshaller
   implicit val unMarshaller: marshalling.ApiUnMarshaller[Json]
 

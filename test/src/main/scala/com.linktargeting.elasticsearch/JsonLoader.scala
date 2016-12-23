@@ -1,6 +1,6 @@
 package com.linktargeting.elasticsearch
 
-import com.linktargeting.elasticsearch.http.marshalling.ApiUnMarshaller
+import marshalling.ApiUnMarshaller
 
 import scala.io.Source
 

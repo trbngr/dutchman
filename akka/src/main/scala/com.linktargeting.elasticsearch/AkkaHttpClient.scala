@@ -6,7 +6,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.stream.Materializer
 import akka.util.ByteString
-import com.linktargeting.elasticsearch.http._
+import com.linktargeting.elasticsearch.api._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -15,7 +15,7 @@ object AkkaHttpClient {
   def apply()(implicit system: ActorSystem, mat: Materializer): AkkaHttpClient = new AkkaHttpClient()
 }
 
-class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extends http.HttpClient {
+class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extends HttpClient {
 
   import marshalling._
 

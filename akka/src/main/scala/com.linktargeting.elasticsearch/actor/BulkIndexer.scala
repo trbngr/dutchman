@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.dsl._
-import com.linktargeting.elasticsearch.http.marshalling.ApiMarshaller
+import com.linktargeting.elasticsearch.marshalling.ApiMarshaller
 import com.linktargeting.elasticsearch.util.InstrumentationContext
 
 import scala.collection.immutable.Queue

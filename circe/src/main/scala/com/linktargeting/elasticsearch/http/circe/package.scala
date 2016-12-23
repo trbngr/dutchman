@@ -3,7 +3,7 @@ package com.linktargeting.elasticsearch.http
 import cats.syntax.either._
 import com.linktargeting.elasticsearch.api._
 import com.linktargeting.elasticsearch.api.translation._
-import com.linktargeting.elasticsearch.http.marshalling._
+import com.linktargeting.elasticsearch.marshalling._
 import io.circe._
 import io.circe.parser._
 

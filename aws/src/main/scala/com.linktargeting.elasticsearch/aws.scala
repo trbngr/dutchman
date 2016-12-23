@@ -8,7 +8,6 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 import com.amazonaws.auth._
-import com.linktargeting.elasticsearch.http._
 
 object aws {
 
