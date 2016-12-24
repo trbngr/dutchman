@@ -47,6 +47,26 @@ trait BoolSpecs[Json] {
         deleteIndex(idx)
       }
     }
+
+    "Be marshalled with multiple should clauses" in {
+      try {
+        whenReady(indexPeople) { _ ⇒
+          val query = Bool(
+            Should(
+              Prefix("name", "ev"),
+              Prefix("city", "ev")
+            )
+          )
+          Search(idx, tpe, query).map { r ⇒
+            println(s"RESPONSE: $r")
+            r.documents foreach println
+          }
+        }
+      } finally {
+        deleteIndex(idx)
+      }
+
+    }
   }
 
 }

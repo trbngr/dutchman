@@ -2,7 +2,7 @@ package dutchman
 
 import scala.concurrent.duration._
 
-package object api extends search {
+package object api extends search with query {
 
   import translation._
 
@@ -13,13 +13,8 @@ package object api extends search {
   sealed trait IndicesApi extends Api
   sealed trait SearchApi extends Api
 
-  sealed trait Query
   sealed trait SearchApiWithOptions{
     val query: Query
-  }
-
-  sealed trait BoolQueryClause {
-    def apply(queries: Query*): (BoolQueryClause, Seq[Query]) = this → queries.toSeq
   }
 
   case class Shards(total: Int, failed: Int, successful: Int)
@@ -87,15 +82,6 @@ package object api extends search {
   case class RefreshResponse(shards: Shards)
 
   //search api
-  case class QueryWithOptions(query: Query, options: SearchOptions) extends Query
-
-  case class Prefix(field: String, value: String, boost: Float = 0) extends Query
-
-  case class Bool(clauses: (BoolQueryClause, Seq[Query])*) extends Query
-  case object Must extends BoolQueryClause
-  case object Filter extends BoolQueryClause
-  case object Should extends BoolQueryClause
-  case object MustNot extends BoolQueryClause
 
   object Search {
     def apply(index: Idx, `type`: Type, query: Query): Search = new Search(Seq(index), Seq(`type`), query)
