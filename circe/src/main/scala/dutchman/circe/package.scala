@@ -16,12 +16,7 @@ package object circe {
 
     def marshal(api: Api) = {
       api match {
-        case bulk: Bulk ⇒
-          val containers = bulk.data.get("actions") collect {
-            case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
-          } getOrElse (throw new RuntimeException("invalid bulk data"))
-
-          containers.map(_.toJson) mkString("", "\n", "\n")
+        case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
         case _: Get     ⇒ ""
         case _: Delete  ⇒ ""
         case _          ⇒ api.data.toJson
