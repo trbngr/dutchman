@@ -33,6 +33,4 @@ package object translation {
   trait RequestTranslator[A <: Api] {
     def request(op: A): Request
   }
-
-
 }

@@ -9,8 +9,11 @@ trait syntax {
   implicit def stringsToIndices(s: Seq[String]): Seq[Idx] = s.map(stringToIdx)
   implicit def stringsToTypes(s: Seq[String]): Seq[Type] = s.map(stringToType)
 
-  implicit class RichBulk(api: Bulk){
-    def bulkData: Seq[DataContainer] = api.data.get("actions") collect {
+  implicit class RichBulk(api: Bulk) {
+
+    import dutchman.api.translation.apiData
+
+    def bulkData: Seq[DataContainer] = apiData(api).get("actions") collect {
       case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
     } getOrElse (throw new RuntimeException("invalid bulk data"))
   }
@@ -22,7 +25,7 @@ trait syntax {
 
     def data: DataContainer = api match {
       case _: Bulk ⇒ throw new UnsupportedOperationException("Use bulkData instead.")
-      case _ ⇒ apiData(api)
+      case _       ⇒ apiData(api)
     }
 
     def request(implicit marshaller: ApiMarshaller): Request = apiRequest(api)
