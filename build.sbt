@@ -2,10 +2,10 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.2",
+  version := "0.5.3",
   organization := "com.caliberweb",
   name := "dutchman",
-  description := "Elasticsearch Http client for Scala",
+  description := "Dutchman",
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions"),

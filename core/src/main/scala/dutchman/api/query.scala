@@ -12,6 +12,7 @@ trait query {
 
   case class Prefix(field: String, value: String, boost: Float = 0) extends Query
   case class Wildcard(field: String, value: String, boost: Float = 0) extends Query
+  case class Term(field: String, value: String, boost: Float = 0) extends Query
 
   case class Bool(clauses: (BoolQueryClause, Seq[Query])*) extends Query
   case object Must extends BoolQueryClause

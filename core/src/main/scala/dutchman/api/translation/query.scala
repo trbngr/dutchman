@@ -19,6 +19,11 @@ object query {
           case Wildcard(field, value, _)                  ⇒ Map("wildcard" → Map(field -> value.toLowerCase()))
         }
 
+        case x: Term ⇒ x match {
+          case Term(field, value, boost) if boost > 0 ⇒ Map("term" → Map(field → Map("value" → value.toLowerCase(), "boost" → boost)))
+          case Term(field, value, _)                  ⇒ Map("term" → Map(field -> value.toLowerCase()))
+        }
+
         case Bool(clauses@_*) ⇒ Map("bool" → clauses.flatMap {
           case (Must, queries)    ⇒ Map("must" → queries.map(QueryTranslator.data))
           case (Filter, queries)  ⇒ Map("filter" → queries.map(QueryTranslator.data))
