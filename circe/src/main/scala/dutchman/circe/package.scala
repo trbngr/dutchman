@@ -2,7 +2,6 @@ package dutchman
 
 import cats.syntax.either._
 import dutchman.api._
-import dutchman.api.translation._
 import dutchman.marshalling._
 import dutchman.marshalling.{ApiMarshaller, ApiUnMarshaller}
 import io.circe._
@@ -15,19 +14,17 @@ package object circe {
 
   implicit object CirceMarshaller extends ApiMarshaller {
 
-    import translation.apiData
-
     def marshal(api: Api) = {
       api match {
         case bulk: Bulk ⇒
-          val containers = apiData(bulk).get("actions") collect {
-            case c: Seq[_] ⇒ c.asInstanceOf[BulkContainers]
+          val containers = bulk.data.get("actions") collect {
+            case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
           } getOrElse (throw new RuntimeException("invalid bulk data"))
 
           containers.map(_.toJson) mkString("", "\n", "\n")
         case _: Get     ⇒ ""
         case _: Delete  ⇒ ""
-        case _          ⇒ apiData(api).toJson
+        case _          ⇒ api.data.toJson
       }
     }
   }

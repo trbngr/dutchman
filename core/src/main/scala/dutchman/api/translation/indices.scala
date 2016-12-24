@@ -5,7 +5,7 @@ import dutchman.api._
 
 object indices {
 
-  object IndicesApiTranslator extends DataTranslator[IndicesApi] with RequestTranslator[IndicesApi] {
+  private[translation] object IndicesApiTranslator extends DataTranslator[IndicesApi] with RequestTranslator[IndicesApi] {
     def data(api: IndicesApi) = api match {
       case x: DeleteIndex ⇒ Map.empty
       case x: Refresh     ⇒ Map.empty

@@ -2,20 +2,21 @@ package dutchman
 
 import scala.concurrent.duration._
 
-package object api extends search with query {
-
-  import translation._
+package object api extends search with query with syntax {
 
   sealed trait Api
+  trait ApiResponse
   sealed trait DocumentApi extends Api
   sealed trait SingleDocumentApi extends DocumentApi
   sealed trait BulkAction
   sealed trait IndicesApi extends Api
   sealed trait SearchApi extends Api
 
-  sealed trait SearchApiWithOptions{
+  sealed trait SearchApiWithOptions {
     val query: Query
   }
+
+  type DataContainer = Map[String, Any]
 
   case class Shards(total: Int, failed: Int, successful: Int)
   case class Response(shards: Shards, index: String, `type`: String, id: String, version: Int)
@@ -65,13 +66,13 @@ package object api extends search with query {
 
   case class Bulk(actions: (BulkAction, SingleDocumentApi)*) extends DocumentApi
 
-  case class BulkResponse(action: BulkAction, status: Int, response: Response)
+  case class BulkResponse(action: BulkAction, status: Int, response: Response) extends ApiResponse
 
-  case class IndexResponse(created: Boolean, response: Response)
+  case class IndexResponse(created: Boolean, response: Response) extends ApiResponse
 
   //indices api
   case class DeleteIndex(index: Idx) extends IndicesApi
-  case class DeleteIndexResponse(acknowledged: Boolean)
+  case class DeleteIndexResponse(acknowledged: Boolean) extends ApiResponse
 
   object Refresh {
     def apply(index: Idx): Refresh = Refresh(Seq(index))
@@ -79,7 +80,7 @@ package object api extends search with query {
     def apply(): Refresh = Refresh(Seq.empty)
   }
   case class Refresh(indices: Seq[Idx]) extends IndicesApi
-  case class RefreshResponse(shards: Shards)
+  case class RefreshResponse(shards: Shards) extends ApiResponse
 
   //search api
 
@@ -93,7 +94,7 @@ package object api extends search with query {
   case class Search(indices: Seq[Idx], types: Seq[Type], query: Query) extends SearchApi with SearchApiWithOptions
 
   case class JsonDocument[Json](index: Idx, `type`: Type, id: Id, score: Float, source: Json)
-  case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]])
+  case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]]) extends ApiResponse
 
   case class StartScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi with SearchApiWithOptions
   case class Scroll(scrollId: String, ttl: FiniteDuration = 1 minute) extends SearchApi
@@ -103,15 +104,6 @@ package object api extends search with query {
   }
   case class ClearScroll(scrollIds: Set[String]) extends SearchApi
 
-  case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json])
+  case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json]) extends ApiResponse
 
-  implicit def stringToId(s: String): Id = Id(s)
-
-  implicit def stringToIdx(s: String): Idx = Idx(s)
-
-  implicit def stringsToIndices(s: Seq[String]): Seq[Idx] = s.map(stringToIdx)
-
-  implicit def stringToType(s: String): Type = Type(s)
-
-  implicit def stringsToTypes(s: Seq[String]): Seq[Type] = s.map(stringToType)
 }

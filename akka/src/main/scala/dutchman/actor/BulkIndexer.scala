@@ -56,20 +56,17 @@ class BulkIndexer[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit v
   def flush(force: Boolean = false) = {
     if ((force || queue.size == config.maxDocuments) && queue.nonEmpty) {
 
-      val api = Bulk(queue.map {
-        case (action, docApi, _) ⇒ action → docApi
-      }: _*)
+      val api = Bulk(queue.map { case (action, docApi, _) ⇒ action → docApi }: _*)
 
       val bulkSession = queue
       queue = Queue.empty[(BulkAction, SingleDocumentApi, ActorRef)]
 
-      val json = translation.apiRequest(api).payload
-      val payloadSizeInMb = json.length / 1024.0 / 1024
+      val payloadSize = api.request.payload.length / 1024.0 / 1024
 
-      log.info(f"Flushing ${api.actions.size} messages ($payloadSizeInMb%.2fMB).")
+      log.info(f"Flushing ${api.actions.size} messages ($payloadSize%.2fMB).")
 
       client.document(api) map { response ⇒
-        log.info(f"Flushed ${response.size} messages ($payloadSizeInMb%.2fMB).")
+        log.info(f"Flushed ${response.size} messages ($payloadSize%.2fMB).")
         if (response.size == bulkSession.size) {
           IndexingSuccessful(response.zip(bulkSession) map {
             case (bulkResponse, (action, docApi, replyTo)) => (action, docApi, bulkResponse, replyTo)

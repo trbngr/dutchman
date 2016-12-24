@@ -1,7 +1,6 @@
 package dutchman
 
 import dutchman.api._
-import dutchman.api.translation.apiRequest
 import dutchman.marshalling.{ApiMarshaller, ApiUnMarshaller}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,7 +44,7 @@ package object dsl extends syntax {
       with SearchApi[Json] {
 
     private def exe[A <: Api, T](api: A, f: Json ⇒ T) = {
-      client.execute[Json](endpoint, signer)(apiRequest(api)) map (f(_))
+      client.execute[Json](endpoint, signer)(api.request) map (f(_))
     }
 
     val document = this

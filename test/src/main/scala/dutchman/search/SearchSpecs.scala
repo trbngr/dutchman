@@ -24,9 +24,10 @@ trait SearchSpecs[Json] {
       Bulk(Index(idx, tpe, person))
     }
 
-    dsl.document(Bulk(actions: _*)) map { _ ⇒
-      refresh(idx)
-    }
+    for {
+      _ ← Bulk(actions: _*)
+      _ ← Refresh(idx)
+    } yield ()
   }
 
   "PrefixQuery" when {
@@ -35,8 +36,10 @@ trait SearchSpecs[Json] {
         whenReady(indexPeople) { _ ⇒
           try {
             val opts = SearchOptions(size = Some(25))
+
             Search(idx, tpe, Prefix("name", "even")).withOptions(opts) map { response ⇒
               response.total shouldBe 5
+
               val persons = response.documents.map(x ⇒ readPerson(x.source))
               persons.size shouldBe 5
             } futureValue

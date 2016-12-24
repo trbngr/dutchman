@@ -5,7 +5,7 @@ import dutchman.api._
 
 object document {
 
-  object DocumentApiTranslator extends DataTranslator[DocumentApi] with RequestTranslator[DocumentApi] {
+  private[translation] object DocumentApiTranslator extends DataTranslator[DocumentApi] with RequestTranslator[DocumentApi] {
     def data(api: DocumentApi) = api match {
       case v: Get   ⇒ Map.empty
       case v: Index ⇒ v.document.data

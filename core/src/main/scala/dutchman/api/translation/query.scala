@@ -4,7 +4,7 @@ import dutchman.api._
 
 object query {
 
-  object QueryTranslator extends DataTranslator[Query] {
+  private[translation] object QueryTranslator extends DataTranslator[Query] {
     def data(query: Query) = {
       query match {
         case QueryWithOptions(q, _) ⇒ QueryTranslator.data(q)

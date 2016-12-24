@@ -7,7 +7,7 @@ object search {
 
   import query.QueryTranslator
 
-  object SearchApiTranslator extends DataTranslator[SearchApi] with RequestTranslator[SearchApi] {
+  private[translation] object SearchApiTranslator extends DataTranslator[SearchApi] with RequestTranslator[SearchApi] {
 
     def data(api: SearchApi) = api match {
       case Search(_, _, query)         ⇒ Map("query" → QueryTranslator.data(query)) ++ SearchOptionsTranslator.data(query)
