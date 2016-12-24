@@ -14,13 +14,11 @@ package object circe {
 
   implicit object CirceMarshaller extends ApiMarshaller {
 
-    def marshal(api: Api) = {
-      api match {
-        case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
-        case _: Get     ⇒ ""
-        case _: Delete  ⇒ ""
-        case _          ⇒ api.data.toJson
-      }
+    def marshal(api: Api) = api match {
+      case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
+      case _: Get     ⇒ ""
+      case _: Delete  ⇒ ""
+      case _          ⇒ api.data.toJson
     }
   }
 
