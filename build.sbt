@@ -2,9 +2,10 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.64",
-  organization := "com.linktargeting.elasticsearch",
-  name := "Elasticsearch Http Client for Scala",
+  version := "0.5.1",
+  organization := "com.caliberweb",
+  name := "dutchman",
+  description := "Elasticsearch Http client for Scala",
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions"),
@@ -22,14 +23,14 @@ lazy val publishSettings = Seq(
   publishMavenStyle := true,
   publishTo := {
     val folder = if (isSnapshot.value) "snapshot" else "release"
-    Some(s3resolver.value(s"$folder LinkTargeting", s3(s"repo.linktargeting.io/$folder")) withMavenPatterns)
+    Some(s3resolver.value("caliberweb repo", s3(s"repo.caliberweb.com/$folder")) withMavenPatterns)
   }
 )
 
-lazy val root = project.in(file("."))
+lazy val dutchman = project.in(file("."))
   .settings(buildSettings: _*)
   .settings(
-    moduleName := "elasticsearch-client",
+    moduleName := "dutchman-client",
     publishArtifact := false,
     publish := {}
   )
@@ -39,14 +40,14 @@ lazy val core = project.in(file("core"))
   .settings(buildSettings: _*)
   .settings(publishSettings: _*)
   .settings(
-    moduleName := "elasticsearch-core",
+    moduleName := "dutchman-core",
     libraryDependencies ++= Seq(slf4j)
   )
 
 lazy val test = project.in(file("test"))
   .settings(buildSettings: _*)
   .settings(
-    moduleName := "elasticsearch-test",
+    moduleName := "dutchman-test",
     libraryDependencies ++= Seq(scalaTest),
     libraryDependencies ++= Seq(elasticsearch),
     publish := {}
@@ -56,7 +57,7 @@ lazy val test = project.in(file("test"))
 lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
-    moduleName := "elasticsearch-akka",
+    moduleName := "dutchman-akka",
     libraryDependencies ++= Seq(akkaHttp, akkaStream, akkaSlf4j, akkaTestKit)
   )
   .dependsOn(core, test % "test", circe % "test")
@@ -65,7 +66,7 @@ lazy val akka = project.in(file("akka"))
 lazy val aws = project.in(file("aws"))
   .settings(buildSettings: _*)
   .settings(
-    moduleName := "elasticsearch-aws",
+    moduleName := "dutchman-aws",
     libraryDependencies ++= Seq(awsSdkCore),
     libraryDependencies ++= Seq(scalaTest % "test")
   )
@@ -75,7 +76,7 @@ lazy val aws = project.in(file("aws"))
 lazy val circe = project.in(file("circe"))
   .settings(buildSettings: _*)
   .settings(
-    moduleName := "elasticsearch-circe",
+    moduleName := "dutchman-circe",
     libraryDependencies ++= Dependencies.circe,
     libraryDependencies ++= Seq(slf4j, scalaTest % "test")
   )
