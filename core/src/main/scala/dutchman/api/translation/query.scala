@@ -5,9 +5,14 @@ import dutchman.api._
 object query {
 
   private[translation] object QueryTranslator extends DataTranslator[Query] {
-    def data(query: Query) = {
+    def data(query: Query): DataContainer = {
       query match {
         case QueryWithOptions(q, _) ⇒ QueryTranslator.data(q)
+
+        case x: MatchAll ⇒ x match {
+          case MatchAll(boost) if boost > 0 ⇒ Map("match_all" → Map("boost" → boost))
+          case MatchAll(_)                  ⇒ Map("match_all" → Map())
+        }
 
         case x: Prefix ⇒ x match {
           case Prefix(field, value, boost) if boost > 0 ⇒ Map("prefix" → Map(field → Map("value" → value.toLowerCase(), "boost" → boost)))
