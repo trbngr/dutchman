@@ -49,4 +49,6 @@ trait syntax {
   implicit class ClearScrollSyntax[Json](api: ClearScroll)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends DslSyntax[Json, Unit](client.search(api))
 
+  implicit class DocumentExistsSyntax[Json](api: DocumentExists)(implicit client: Dsl[Json], ec: ExecutionContext)
+    extends DslSyntax[Json, Boolean](client.document(api))
 }

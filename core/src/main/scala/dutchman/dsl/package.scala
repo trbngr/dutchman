@@ -24,6 +24,7 @@ package object dsl extends dsl.syntax {
   trait DocumentApiClient[Json] {
     def apply(api: Index): Future[IndexResponse]
     def apply(api: Bulk): Future[Seq[BulkResponse]]
+    def apply(api: DocumentExists): Future[Boolean]
   }
 
   trait IndicesApiClient[Json] {
@@ -44,12 +45,13 @@ package object dsl extends dsl.syntax {
       with SearchApi[Json] {
 
     private def exe[A <: Api, T](api: A, f: Json ⇒ T) = {
-      client.execute[Json](endpoint, signer)(api.request) map (f(_))
+      val request = signer.sign(endpoint, api.request)
+      client.execute[Json](endpoint)(request) map (f(_))
     }
 
     val document = this
     val indices = this
-    val search  = this
+    val search = this
 
     def apply(api: Index): Future[IndexResponse] = exe(api, unMarshaller.index)
     def apply(api: Bulk): Future[Seq[BulkResponse]] = exe(api, unMarshaller.bulk)
@@ -62,5 +64,10 @@ package object dsl extends dsl.syntax {
     def apply(api: StartScroll): Future[ScrollResponse[Json]] = exe(api, unMarshaller.scroll)
     def apply(api: Search, options: SearchOptions): Future[SearchResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.search)
     def apply(api: StartScroll, options: SearchOptions): Future[ScrollResponse[Json]] = exe(api.copy(query = QueryWithOptions(api.query, options)), unMarshaller.scroll)
+
+    def apply(api: DocumentExists): Future[Boolean] = {
+      val request = signer.sign(endpoint, api.request)
+      client.documentExists(endpoint)(request)
+    }
   }
 }

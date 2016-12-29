@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.8",
+  version := "0.5.10",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",

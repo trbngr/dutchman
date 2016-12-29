@@ -1,3 +1,4 @@
+import dutchman.api._
 import dutchman.marshalling._
 
 import scala.concurrent.Future
@@ -13,7 +14,7 @@ package object dutchman {
   case class Header(name: String, value: String)
   case class Request(verb: Verb, path: String, params: Map[String, String] = Map.empty, headers: Seq[Header] = Seq.empty, payload: String = "")
 
-  object Endpoint{
+  object Endpoint {
     val localhost: Endpoint = localhost(9200)
     def localhost(port: Int): Endpoint = Endpoint("localhost", port)
   }
@@ -28,7 +29,7 @@ package object dutchman {
   }
 
   trait HttpClient {
-    def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)
-                     (implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json]
+    def documentExists(endpoint: Endpoint)(request: Request): Future[Boolean]
+    def execute[Json](endpoint: Endpoint)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json]
   }
 }

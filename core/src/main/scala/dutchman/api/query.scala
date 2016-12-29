@@ -16,6 +16,10 @@ trait query {
   case class Prefix(field: String, value: String, boost: Double = 0) extends Query
   case class Wildcard(field: String, value: String, boost: Double = 0) extends Query
   case class Term(field: String, value: String, boost: Double = 0) extends Query
+  case class Ids(ids: Set[Id], `type`: Option[Type] = None) extends Query
+  object Ids{
+    def apply(ids: Set[Id], `type`: Type): Ids = new Ids(ids, Some(`type`))
+  }
 
   case class Bool(clauses: (BoolQueryClause, Seq[Query])*) extends Query
   case object Must extends BoolQueryClause

@@ -3,10 +3,11 @@ package dutchman.actor
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import dutchman.AkkaHttpClient
+import dutchman.{AkkaHttpClient, Endpoint}
 import dutchman.api._
+import dutchman.circe._
+import dutchman.dsl._
 import dutchman.model._
-import dutchman.model.Person
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}

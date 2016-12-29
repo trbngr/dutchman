@@ -4,8 +4,8 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import cats.syntax.either._
-import marshalling._
-import dutchman.model._
+import dutchman.circe._
+import dutchman.marshalling._
 import dutchman.model.Person
 import io.circe.Json
 import io.circe.generic.semiauto._

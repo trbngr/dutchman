@@ -47,6 +47,7 @@ package object api extends search with query with syntax {
     def apply[A: ESDocument](index: Idx, `type`: Type, document: A): Update = new Update(index, `type`, implicitly[ESDocument[A]].document(document))
   }
 
+  case class DocumentExists(index: Idx, `type`: Type, id: Id) extends DocumentApi
   case class Index(index: Idx, `type`: Type, document: Document, version: Option[Int]) extends SingleDocumentApi
   case class Get(index: Idx, `type`: Type, id: Id) extends SingleDocumentApi
   case class Delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) extends SingleDocumentApi

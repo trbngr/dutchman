@@ -35,6 +35,8 @@ object query {
           case (Should, queries)  ⇒ Map("should" → queries.map(QueryTranslator.data))
           case (MustNot, queries) ⇒ Map("must_not" → queries.map(QueryTranslator.data))
         }.toMap)
+
+        case Ids(ids, tpe) ⇒ Map("ids" → Map("values" → ids.map(_.value))) ++ tpe.map("type" → _)
       }
     }
   }

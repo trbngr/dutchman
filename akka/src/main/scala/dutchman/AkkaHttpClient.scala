@@ -21,8 +21,14 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   val http = Http(system)
   implicit val ec = system.dispatcher
 
-  def execute[Json](endpoint: Endpoint, signer: ESRequestSigner)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
-    http.singleRequest(buildRequest(endpoint, signer, request)) flatMap { response =>
+  def documentExists(endpoint: Endpoint)(request: Request) = {
+    http.singleRequest(buildRequest(endpoint, request, includeEntity = false)) map { response ⇒
+      if (response.status.isSuccess()) true else false
+    }
+  }
+
+  def execute[Json](endpoint: Endpoint)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
+    http.singleRequest(buildRequest(endpoint, request)) flatMap { response =>
       response.entity.json { response ⇒
         val json = unMarshaller.read(response)
         unMarshaller.readError(json) match {
@@ -33,11 +39,16 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     }
   }
 
-  private def buildRequest(endpoint: Endpoint, signer: ESRequestSigner, request: Request): HttpRequest = {
-    val signed = signer.sign(endpoint, request)
-    val entity = HttpEntity(signed.payload)
+  private def buildRequest(endpoint: Endpoint, request: Request, includeEntity: Boolean = true): HttpRequest = {
+    val entity = HttpEntity(request.payload)
     val uri = request.uri(endpoint)
-    val unauthed = HttpRequest(method = request.verb, uri = uri, entity = entity)
+    val unauthed = {
+      val req = HttpRequest(method = request.verb, uri = uri)
+      if(includeEntity)
+        req.copy(entity = entity)
+      else
+        req
+    }
 
     val hostHeader = request.headers.find(_.name == "Host").map(x ⇒ Host(x.value))
     val headers = request.headers.filterNot(_.name == "Host").map(x ⇒ RawHeader(x.name, x.value)) ++ hostHeader
