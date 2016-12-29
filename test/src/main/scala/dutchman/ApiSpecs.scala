@@ -59,6 +59,7 @@ trait ApiSpecs[Json]
           _ ← Index(index, tpe, Document(id, Map("name" → "chris")), None)
           _ ← Refresh(index)
           e ← DocumentExists(index, tpe, id)
+          _ ← DeleteIndex(index)
         } yield e
 
         response map { exists ⇒
