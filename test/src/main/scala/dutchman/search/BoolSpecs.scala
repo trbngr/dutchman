@@ -38,6 +38,7 @@ trait BoolSpecs[Json] {
           val query = Bool(
             Must(Prefix("name", "ev"), Prefix("city", "ev"))
           )
+//          prefix"name:$ev"
           Search(idx, tpe, query).map { r ⇒
             println(s"RESPONSE: $r")
             r.documents foreach println

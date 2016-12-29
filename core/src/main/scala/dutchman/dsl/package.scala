@@ -5,7 +5,7 @@ import dutchman.marshalling.{ApiMarshaller, ApiUnMarshaller}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-package object dsl extends syntax {
+package object dsl extends dsl.syntax {
   trait Dsl[Json] {
     val document: DocumentApiClient[Json]
     val indices: IndicesApiClient[Json]

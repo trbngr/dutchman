@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.6",
+  version := "0.5.7",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",
@@ -41,7 +41,8 @@ lazy val core = project.in(file("core"))
   .settings(publishSettings: _*)
   .settings(
     moduleName := "dutchman-core",
-    libraryDependencies ++= Seq(slf4j)
+    libraryDependencies ++= Seq(slf4j),
+    libraryDependencies ++= Seq(scalaTest % Test)
   )
 
 lazy val test = project.in(file("test"))
@@ -60,7 +61,7 @@ lazy val akka = project.in(file("akka"))
     moduleName := "dutchman-akka",
     libraryDependencies ++= Seq(akkaHttp, akkaStream, akkaSlf4j, akkaTestKit)
   )
-  .dependsOn(core, test % "test", circe % "test")
+  .dependsOn(core, test % Test, circe % Test)
   .settings(publishSettings: _*)
 
 lazy val aws = project.in(file("aws"))
@@ -68,7 +69,7 @@ lazy val aws = project.in(file("aws"))
   .settings(
     moduleName := "dutchman-aws",
     libraryDependencies ++= Seq(awsSdkCore),
-    libraryDependencies ++= Seq(scalaTest % "test")
+    libraryDependencies ++= Seq(scalaTest % Test)
   )
   .dependsOn(core)
   .settings(publishSettings: _*)
@@ -78,7 +79,7 @@ lazy val circe = project.in(file("circe"))
   .settings(
     moduleName := "dutchman-circe",
     libraryDependencies ++= Dependencies.circe,
-    libraryDependencies ++= Seq(slf4j, scalaTest % "test")
+    libraryDependencies ++= Seq(slf4j, scalaTest % Test)
   )
-  .dependsOn(core, test % "test")
+  .dependsOn(core, test % Test)
   .settings(publishSettings: _*)
