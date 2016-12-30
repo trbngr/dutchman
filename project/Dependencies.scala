@@ -11,6 +11,7 @@ object Dependencies {
     val json4s = "3.5.0"
     val elasticsearch = "2.4.3"
     val slf4j = "1.7.16"
+    val cats = "0.8.1"
   }
 
   private def akkaModule(module: String, version: String = Version.akka) = "com.typesafe.akka" %% s"akka-$module" % version
@@ -28,6 +29,7 @@ object Dependencies {
 
   val awsSdkCore = "com.amazonaws" % "aws-java-sdk-core" % Version.awsSdkCore
   val json4s = "org.json4s" %% "json4s-native" % Version.json4s
+  val cats = "org.typelevel" %% "cats-free" % Version.cats
 
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest
   val elasticsearch = "org.elasticsearch" % "elasticsearch" % Version.elasticsearch

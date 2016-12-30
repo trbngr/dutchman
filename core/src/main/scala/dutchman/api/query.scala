@@ -6,10 +6,6 @@ trait query {
 
   sealed trait Query
 
-  sealed trait BoolQueryClause {
-    def apply(queries: Query*): (BoolQueryClause, Seq[Query]) = this → queries.toSeq
-  }
-
   case class QueryWithOptions(query: Query, options: SearchOptions) extends Query
 
   case class MatchAll(boost: Double = 0) extends Query
@@ -17,11 +13,16 @@ trait query {
   case class Wildcard(field: String, value: String, boost: Double = 0) extends Query
   case class Term(field: String, value: String, boost: Double = 0) extends Query
   case class Ids(ids: Set[Id], `type`: Option[Type] = None) extends Query
-  object Ids{
+  object Ids {
     def apply(ids: Set[Id], `type`: Type): Ids = new Ids(ids, Some(`type`))
   }
 
   case class Bool(clauses: (BoolQueryClause, Seq[Query])*) extends Query
+
+  sealed trait BoolQueryClause {
+    def apply(queries: Query*): (BoolQueryClause, Seq[Query]) = this → queries.toSeq
+  }
+
   case object Must extends BoolQueryClause
   case object Filter extends BoolQueryClause
   case object Should extends BoolQueryClause
@@ -34,10 +35,12 @@ trait query {
     def extract[T](input: String)(factory: PartialFunction[(String, String, Double), T]): T = {
       val pattern = "([^:]+):([^:]+):?([0-9]*)?".r
       input match {
-        case pattern(field, value, boostStr) ⇒ factory((field, value, Try(boostStr.toDouble) match {
-          case Success(boost) ⇒ boost
-          case _              ⇒ 0
-        }))
+        case pattern(field, value, boostStr) ⇒
+          val boost = Try(boostStr.toDouble) match {
+            case Success(b) ⇒ b
+            case _          ⇒ 0
+          }
+          factory((field, value, boost))
         case _                               ⇒ throw InvalidQueryPatternError
       }
     }

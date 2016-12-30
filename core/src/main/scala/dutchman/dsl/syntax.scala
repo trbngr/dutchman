@@ -20,6 +20,9 @@ trait syntax {
   implicit class IndexSyntax[Json](api: Index)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends DslSyntax[Json, IndexResponse](client.document(api))
 
+  implicit class GetSyntax[Json](api: Get)(implicit client: Dsl[Json], ec: ExecutionContext)
+    extends DslSyntax[Json, GetResponse[Json]](client.document(api))
+
   implicit class BulkSyntax[Json](api: Bulk)(implicit client: Dsl[Json], ec: ExecutionContext)
     extends DslSyntax[Json, Seq[BulkResponse]](client.document(api))
 

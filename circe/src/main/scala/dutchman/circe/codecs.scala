@@ -90,4 +90,16 @@ private[circe] object codecs {
       results = json.as[SearchResponse[Json]].getOrElse(SearchResponse[Json](Shards(0, 0, 0), 0, Seq.empty))
     )
   }
+
+  implicit val getResponseEncoder = deriveEncoder[GetResponse[Json]]
+  implicit val getResponseDecoder = Decoder.decodeJson map {json ⇒
+    GetResponse(
+      index = json \ "_index" string "",
+      `type` = json \ "_type" string "",
+      id = json \ "_id" string "",
+      version = json \ "_version" int 0,
+      found = json \ "found" bool false,
+      source = json \ "_source" json
+    )
+  }
 }

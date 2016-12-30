@@ -13,6 +13,7 @@ object marshalling {
     def read(json: String): Json
     def error(json: String): ESError
     def readError(json: Json): Option[Seq[ESError]]
+    def get(json: Json): GetResponse[Json]
     def index(json: Json): IndexResponse
     def deleteIndex(json: Json): DeleteIndexResponse
     def bulk(json: Json): Seq[BulkResponse]

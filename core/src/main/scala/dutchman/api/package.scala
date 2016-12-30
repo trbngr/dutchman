@@ -4,13 +4,12 @@ import scala.concurrent.duration._
 
 package object api extends search with query with syntax {
 
-  sealed trait Api
-  trait ApiResponse
-  sealed trait DocumentApi extends Api
-  sealed trait SingleDocumentApi extends DocumentApi
+  sealed trait Api[A]
+  sealed trait DocumentApi[A] extends Api[A]
+  sealed trait SingleDocumentApi[A] extends DocumentApi[A]
   sealed trait BulkAction
-  sealed trait IndicesApi extends Api
-  sealed trait SearchApi extends Api
+  sealed trait IndicesApi[A] extends Api[A]
+  sealed trait SearchApi[A] extends Api[A]
 
   sealed trait SearchApiWithOptions {
     val query: Query
@@ -47,12 +46,12 @@ package object api extends search with query with syntax {
     def apply[A: ESDocument](index: Idx, `type`: Type, document: A): Update = new Update(index, `type`, implicitly[ESDocument[A]].document(document))
   }
 
-  case class DocumentExists(index: Idx, `type`: Type, id: Id) extends DocumentApi
-  case class Index(index: Idx, `type`: Type, document: Document, version: Option[Int]) extends SingleDocumentApi
-  case class Get(index: Idx, `type`: Type, id: Id) extends SingleDocumentApi
-  case class Delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) extends SingleDocumentApi
-  case class Update(index: Idx, `type`: Type, document: Document) extends SingleDocumentApi
-  case class MultiGet(ids: (Idx, Option[Type], Option[Id])*) extends DocumentApi
+  case class DocumentExists(index: Idx, `type`: Type, id: Id) extends DocumentApi[Boolean]
+  case class Index(index: Idx, `type`: Type, document: Document, version: Option[Int]) extends SingleDocumentApi[IndexResponse]
+  case class Get[Json](index: Idx, `type`: Type, id: Id) extends SingleDocumentApi[GetResponse[Json]]
+  case class Delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) extends SingleDocumentApi[DeleteResponse]
+  case class Update(index: Idx, `type`: Type, document: Document) extends SingleDocumentApi[UpdateResponse]
+  case class MultiGet(ids: (Idx, Option[Type], Option[Id])*) extends DocumentApi[MultiGetResponse]
 
   case object BulkIndex extends BulkAction
   case object BulkCreate extends BulkAction
@@ -60,51 +59,53 @@ package object api extends search with query with syntax {
   case object BulkUpdate extends BulkAction
 
   object Bulk {
-    def apply(c: Index, create: Boolean = false): (BulkAction, SingleDocumentApi) = (if (create) BulkCreate else BulkIndex) → c
-    def apply(c: Update): (BulkAction, SingleDocumentApi) = BulkUpdate → c
-    def apply(c: Delete): (BulkAction, SingleDocumentApi) = BulkDelete → c
+    def apply(c: Index, create: Boolean = false): (BulkAction, Index) = (if (create) BulkCreate else BulkIndex) → c
+    def apply(c: Update): (BulkAction, Update) = BulkUpdate → c
+    def apply(c: Delete): (BulkAction, Delete) = BulkDelete → c
   }
 
-  case class Bulk(actions: (BulkAction, SingleDocumentApi)*) extends DocumentApi
+  case class Bulk[A, B: SingleDocumentApi[_]](actions: (BulkAction, B)*) extends DocumentApi[A]
 
-  case class BulkResponse(action: BulkAction, status: Int, response: Response) extends ApiResponse
+  case class BulkResponse(action: BulkAction, status: Int, response: Response) 
 
-  case class IndexResponse(created: Boolean, response: Response) extends ApiResponse
+  case class IndexResponse(created: Boolean, response: Response)
+  case class DeleteResponse()
+  case class UpdateResponse()
+  case class MultiGetResponse()
+  case class GetResponse[Json](index: String, `type`: String, id: String, version: Int, found: Boolean, source: Json)
 
   //indices api
-  case class DeleteIndex(index: Idx) extends IndicesApi
-  case class DeleteIndexResponse(acknowledged: Boolean) extends ApiResponse
+  case class DeleteIndex(index: Idx) extends IndicesApi[DeleteIndexResponse]
+  case class DeleteIndexResponse(acknowledged: Boolean) 
 
   object Refresh {
     def apply(index: Idx): Refresh = Refresh(Seq(index))
 
     def apply(): Refresh = Refresh(Seq.empty)
   }
-  case class Refresh(indices: Seq[Idx]) extends IndicesApi
-  case class RefreshResponse(shards: Shards) extends ApiResponse
+  case class Refresh(indices: Seq[Idx]) extends IndicesApi[RefreshResponse]
+  case class RefreshResponse(shards: Shards) 
 
   //search api
 
   object Search {
-    def apply(index: Idx, `type`: Type, query: Query): Search = new Search(Seq(index), Seq(`type`), query)
-
-    def apply(indices: Seq[Idx], `type`: Type, query: Query): Search = new Search(indices, Seq(`type`), query)
-
-    def apply(index: Idx, types: Seq[Type], query: Query): Search = new Search(Seq(index), types, query)
+    def apply[Json](index: Idx, `type`: Type, query: Query): Search[Json] = new Search(Seq(index), Seq(`type`), query)
+    def apply[Json](indices: Seq[Idx], `type`: Type, query: Query): Search[Json] = new Search(indices, Seq(`type`), query)
+    def apply[Json](index: Idx, types: Seq[Type], query: Query): Search[Json] = new Search(Seq(index), types, query)
   }
-  case class Search(indices: Seq[Idx], types: Seq[Type], query: Query) extends SearchApi with SearchApiWithOptions
+  case class Search[Json](indices: Seq[Idx], types: Seq[Type], query: Query) extends SearchApi[SearchResponse[Json]] with SearchApiWithOptions
 
   case class JsonDocument[Json](index: Idx, `type`: Type, id: Id, score: Float, source: Json)
-  case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]]) extends ApiResponse
+  case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]]) 
 
-  case class StartScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi with SearchApiWithOptions
-  case class Scroll(scrollId: String, ttl: FiniteDuration = 1 minute) extends SearchApi
+  case class StartScroll[Json](index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute) extends SearchApi[ScrollResponse[Json]] with SearchApiWithOptions
+  case class Scroll[Json](scrollId: String, ttl: FiniteDuration = 1 minute) extends SearchApi[ScrollResponse[Json]]
 
   object ClearScroll {
     def apply(scrollId: String): ClearScroll = new ClearScroll(Set(scrollId))
   }
-  case class ClearScroll(scrollIds: Set[String]) extends SearchApi
+  case class ClearScroll(scrollIds: Set[String]) extends SearchApi[Unit]
 
-  case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json]) extends ApiResponse
+  case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json]) 
 
 }

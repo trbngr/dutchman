@@ -72,8 +72,9 @@ package object circe {
       None
     }
     def bulk(json: Json) = json \ "items" bulkResponses
-    override def search(json: Json) = json.as[SearchResponse[Json]].getOrElse(e("search"))
-    override def refresh(json: Json) = json.as[RefreshResponse].getOrElse(e("refresh"))
-    override def scroll(json: Json) = json.as[ScrollResponse[Json]].getOrElse(e("scroll"))
+    def search(json: Json) = json.as[SearchResponse[Json]].getOrElse(e("search"))
+    def refresh(json: Json) = json.as[RefreshResponse].getOrElse(e("refresh"))
+    def scroll(json: Json) = json.as[ScrollResponse[Json]].getOrElse(e("scroll"))
+    def get(json: Json) = json.as[GetResponse[Json]].getOrElse(e("get"))
   }
 }
