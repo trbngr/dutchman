@@ -59,7 +59,7 @@ lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "dutchman-akka",
-    libraryDependencies ++= Seq(akkaHttp, akkaStream, akkaSlf4j, akkaTestKit)
+    libraryDependencies ++= Seq(akkaHttp, akkaStream, akkaTestKit)
   )
   .dependsOn(core, test % Test, circe % Test)
   .settings(publishSettings: _*)
