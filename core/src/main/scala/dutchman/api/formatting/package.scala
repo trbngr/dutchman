@@ -3,7 +3,7 @@ package dutchman.api
 import dutchman.api.formatting.document.DocumentApiFormatter
 import dutchman.api.formatting.search.SearchApiFormatter
 import dutchman.http.Request
-import dutchman.marshalling.ApiMarshaller
+import dutchman.marshalling.OperationWriter
 
 package object formatting {
 
@@ -18,14 +18,14 @@ package object formatting {
     case v: SearchApi   ⇒ SearchApiFormatter.data(v)
   }
 
-  private[dutchman] def apiRequest[A](api: Api[A])(implicit marshaller: ApiMarshaller): Request = {
+  private[dutchman] def apiRequest[A](api: Api[A])(implicit writer: OperationWriter): Request = {
     val request = api match {
       case v: DocumentApi ⇒ DocumentApiFormatter.request(v)
       case v: IndicesApi  ⇒ IndicesApiFormatter.request(v)
       case v: SearchApi   ⇒ SearchApiFormatter.request(v)
     }
     request.copy(
-      payload = marshaller.marshal(api)
+      payload = writer.write(api)
     )
   }
 

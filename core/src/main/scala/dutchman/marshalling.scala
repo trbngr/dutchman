@@ -5,11 +5,11 @@ import dutchman.api._
 object marshalling {
   case class DecodingError(message: String) extends Exception(s"Error decoding json: $message")
 
-  trait ApiMarshaller {
-    def marshal[A](api: Api[A]): String
+  trait OperationWriter {
+    def write[A](api: Api[A]): String
   }
 
-  trait ApiUnMarshaller[Json] {
+  trait ResponseReader[Json] {
     def read(json: String): Json
     def error(json: String): ESError
     def readError(json: Json): Option[Seq[ESError]]

@@ -12,34 +12,42 @@ package object dutchman {
 
   type ESApi[A] = Free[Api, A]
 
-  implicit class RichHttpClient[Json](client: HttpClient)(implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]) {
+  implicit class RichHttpClient[Json](client: HttpClient)(implicit ec: ExecutionContext, writer: OperationWriter, reader: ResponseReader[Json]) {
     def bind(endpoint: Endpoint, signer: ESRequestSigner = NullRequestSigner) = new ESClient(client, endpoint, signer)
   }
 
   final class ESClient[Json](client: HttpClient, endpoint: Endpoint, signer: ESRequestSigner)
-                            (implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]) extends OperationDefinitions[Json, Future] {
+                            (implicit ec: ExecutionContext, writer: OperationWriter, reader: ResponseReader[Json]) extends OperationDefinitions[Json, Future] {
 
     private def request[A](api: Api[A], fx: Json ⇒ A): Future[A] = {
       val request = signer.sign(endpoint, formatting.apiRequest(api))
-      client.execute(endpoint)(request) map fx
+      client.execute(endpoint)(request) map { jsonStr ⇒
+        val json = reader.read(jsonStr)
+        reader.readError(json) match {
+          case Some(errors) ⇒ throw ESErrorsException(errors)
+          case _            ⇒ fx(json)
+        }
+      } recover {
+        case e: Throwable ⇒ throw HttpError(e.getMessage)
+      }
     }
 
     private val compiler = new (Api ~> Future) {
       def apply[A](fa: Api[A]) = {
         val future = fa match {
-          case x: Bulk           ⇒ request(x, unMarshaller.bulk)
+          case x: Bulk           ⇒ request(x, reader.bulk)
           case x: ClearScroll    ⇒ request(x, _ ⇒ ())
-          case x: Delete         ⇒ request(x, unMarshaller.delete)
-          case x: DeleteIndex    ⇒ request(x, unMarshaller.deleteIndex)
+          case x: Delete         ⇒ request(x, reader.delete)
+          case x: DeleteIndex    ⇒ request(x, reader.deleteIndex)
           case x: DocumentExists ⇒ client.documentExists(endpoint)(signer.sign(endpoint, formatting.apiRequest(x)))
-          case x: Get[_]         ⇒ request(x, unMarshaller.get)
-          case x: Index          ⇒ request(x, unMarshaller.index)
-          case x: MultiGet       ⇒ request(x, unMarshaller.multiGet)
-          case x: Refresh        ⇒ request(x, unMarshaller.refresh)
-          case x: Scroll[_]      ⇒ request(x, unMarshaller.scroll)
-          case x: Search[_]      ⇒ request(x, unMarshaller.search)
-          case x: StartScroll[_] ⇒ request(x, unMarshaller.scroll)
-          case x: Update         ⇒ request(x, unMarshaller.update)
+          case x: Get[_]         ⇒ request(x, reader.get)
+          case x: Index          ⇒ request(x, reader.index)
+          case x: MultiGet       ⇒ request(x, reader.multiGet)
+          case x: Refresh        ⇒ request(x, reader.refresh)
+          case x: Scroll[_]      ⇒ request(x, reader.scroll)
+          case x: Search[_]      ⇒ request(x, reader.search)
+          case x: StartScroll[_] ⇒ request(x, reader.scroll)
+          case x: Update         ⇒ request(x, reader.update)
         }
         future map (_.asInstanceOf[A])
       }

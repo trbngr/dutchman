@@ -27,8 +27,8 @@ trait ApiSpecs[Json]
   def readPerson(json: Json): Person
 
   val httpClient: HttpClient
-  implicit val marshaller: marshalling.ApiMarshaller
-  implicit val unMarshaller: marshalling.ApiUnMarshaller[Json]
+  implicit val operationWriter: marshalling.OperationWriter
+  implicit val responseReader: marshalling.ResponseReader[Json]
 
   lazy implicit val client = httpClient.bind(Endpoint.localhost)
 

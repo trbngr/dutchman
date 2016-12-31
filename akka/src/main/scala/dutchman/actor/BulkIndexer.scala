@@ -4,7 +4,6 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import dutchman.ESClient
 import dutchman.api._
-import dutchman.marshalling._
 
 import scala.collection.immutable.Queue
 
@@ -15,14 +14,14 @@ object BulkIndexer {
   case class DocumentIndexed(response: BulkResponse)
   case class DocumentNotIndexed(cause: String, action: BulkAction, api: SingleDocumentApi)
 
-  def props[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit marshaller: ApiMarshaller): Props = {
+  def props[Json](client: ESClient[Json], config: BulkIndexerConfig): Props = {
     Props(new BulkIndexer[Json](client, config))
   }
 
-  def props[Json](client: ESClient[Json])(implicit marshaller: ApiMarshaller): Props = props(client, BulkIndexerConfig())
+  def props[Json](client: ESClient[Json]): Props = props(client, BulkIndexerConfig())
 }
 
-class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit val marshaller: ApiMarshaller) extends Actor {
+class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig) extends Actor {
 
   import BulkIndexer._
   import akka.pattern.pipe

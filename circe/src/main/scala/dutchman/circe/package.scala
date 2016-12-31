@@ -3,7 +3,7 @@ package dutchman
 import cats.syntax.either._
 import dutchman.api._
 import dutchman.marshalling._
-import dutchman.marshalling.{ApiMarshaller, ApiUnMarshaller}
+import dutchman.marshalling.{OperationWriter, ResponseReader}
 import dutchman.api.formatting.DataContainer
 import io.circe._
 import io.circe.parser._
@@ -13,9 +13,9 @@ package object circe {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  implicit object CirceMarshaller extends ApiMarshaller {
+  implicit object CirceOperationWriter extends OperationWriter {
 
-    def marshal[A](api: Api[A]) = api match {
+    def write[A](api: Api[A]) = api match {
       case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
       case _: Get[_]     ⇒ ""
       case _: Delete  ⇒ ""
@@ -45,7 +45,7 @@ package object circe {
     }
   }
 
-  implicit object CirceUnmarshaller extends ApiUnMarshaller[Json] {
+  implicit object CirceResponseReader extends ResponseReader[Json] {
 
     import codecs._
     import syntax._

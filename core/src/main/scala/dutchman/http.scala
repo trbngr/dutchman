@@ -1,6 +1,6 @@
 package dutchman
 
-import dutchman.marshalling.ApiUnMarshaller
+import dutchman.marshalling.ResponseReader
 
 import scala.concurrent.Future
 
@@ -31,7 +31,9 @@ object http {
   }
 
   trait HttpClient {
-    def execute[Json](endpoint: Endpoint)(request: Request)(implicit unMarshaller: ApiUnMarshaller[Json]): Future[Json]
+    def execute(endpoint: Endpoint)(request: Request): Future[String]
     def documentExists(endpoint: Endpoint)(request: Request): Future[Boolean]
   }
+
+  case class HttpError(message: String) extends Exception(message)
 }

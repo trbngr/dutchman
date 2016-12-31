@@ -13,8 +13,8 @@ import org.scalatest.BeforeAndAfterAll
 
 class AkkaApiSpecs extends TestKit(ActorSystem("AkkaApiSpecs")) with ApiSpecs[Json] with BeforeAndAfterAll {
   implicit val mat = ActorMaterializer()
-  implicit val marshaller = CirceMarshaller
-  implicit val unMarshaller = CirceUnmarshaller
+  implicit val operationWriter = CirceOperationWriter
+  implicit val responseReader = CirceResponseReader
   implicit val personDecoder = deriveDecoder[Person]
 
   val httpClient = new AkkaHttpClient()

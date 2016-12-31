@@ -23,6 +23,6 @@ trait syntax {
       case _: Bulk ⇒ throw new UnsupportedOperationException("Use bulkData instead.")
       case _       ⇒ apiData(api)
     }
-    def request(implicit marshaller: ApiMarshaller): Request = apiRequest(api)
+    def request(implicit writer: OperationWriter): Request = apiRequest(api)
   }
 }

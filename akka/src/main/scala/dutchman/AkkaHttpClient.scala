@@ -6,7 +6,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.stream.Materializer
 import akka.util.ByteString
-import dutchman.api._
 import dutchman.http._
 
 import scala.concurrent.Future
@@ -17,8 +16,6 @@ object AkkaHttpClient {
 
 class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extends HttpClient {
 
-  import marshalling._
-
   val http = Http(system)
   implicit val ec = system.dispatcher
 
@@ -28,16 +25,8 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     }
   }
 
-  def execute[Json](endpoint: Endpoint)(request: Request)(implicit unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
-    http.singleRequest(buildRequest(endpoint, request)) flatMap { response =>
-      response.entity.json { response ⇒
-        val json = unMarshaller.read(response)
-        unMarshaller.readError(json) match {
-          case Some(errors) ⇒ throw ESErrorsException(errors)
-          case _            ⇒ json
-        }
-      }
-    }
+  def execute(endpoint: Endpoint)(request: Request): Future[String] = {
+    http.singleRequest(buildRequest(endpoint, request)).flatMap(_.entity.json)
   }
 
   private def buildRequest(endpoint: Endpoint, request: Request, includeEntity: Boolean = true): HttpRequest = {
@@ -45,7 +34,7 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     val uri = request.uri(endpoint)
     val unauthed = {
       val req = HttpRequest(method = request.verb, uri = uri)
-      if(includeEntity)
+      if (includeEntity)
         req.copy(entity = entity)
       else
         req
@@ -79,8 +68,8 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   }
 
   private implicit class entityToJson(entity: HttpEntity) {
-    def json[T](f: String ⇒ T): Future[T] = {
-      entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String) map f
+    def json: Future[String] = {
+      entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
     }
   }
 }
