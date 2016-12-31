@@ -1,8 +1,8 @@
 package dutchman.document
 
-import dutchman._
 import dutchman.api._
 import dutchman.model._
+import dutchman._
 import org.scalatest.BeforeAndAfterAll
 
 import scala.util.Random
@@ -16,8 +16,14 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
     "updating a non-existing document" should {
       "?" in {
         val action = Bulk(Update(idx, tpe, Person("123", "Frank", "Philly")))
-        val json = dsl.document(Bulk(action)).futureValue
-        deleteIndex(idx)
+        val ops = client.ops
+        val api = for {
+          r ← ops.bulk(Seq(action): _*)
+          _ ← ops.deleteIndex(idx)
+        } yield r
+
+        val response = client(api).futureValue
+        println(response)
       }
     }
 
@@ -30,12 +36,15 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
             city = Random.alphanumeric.take(3).mkString
           )))
         }
-        val response = dsl.document(Bulk(actions: _*)).futureValue
 
-        response.size shouldBe 10
-        response.map(_.status).toSet should contain only 201
+        val ops = client.ops
+        val api = for {
+          r ← ops.bulk(actions: _*)
+          _ ← ops.deleteIndex(idx)
+        } yield r
 
-        deleteIndex(idx)
+        val response = client(api).futureValue
+        println(response)
       }
     }
   }

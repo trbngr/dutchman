@@ -1,41 +1,41 @@
-package dutchman.api.translation
+package dutchman.api.formatting
 
-import dutchman._
 import dutchman.api._
+import dutchman.http._
 
 object search {
 
   import query.QueryTranslator
 
-  private[translation] object SearchApiTranslator extends DataTranslator[SearchApi] with RequestTranslator[SearchApi] {
+  private[formatting] object SearchApiFormatter extends DataFormatter[SearchApi] with RequestFormatter[SearchApi] {
 
     def data(api: SearchApi) = api match {
-      case Search(_, _, query)         ⇒ Map("query" → QueryTranslator.data(query)) ++ SearchOptionsTranslator.data(query)
-      case StartScroll(_, _, query, _) ⇒ Map("query" → (QueryTranslator.data(query) + ("sort" → Seq("_doc")))) ++ SearchOptionsTranslator.data(query)
-      case x: Scroll                   ⇒ Map("sort" → Seq("_doc"))
-      case ClearScroll(scrollIds)      ⇒ Map("scroll_id" → scrollIds)
+      case Search(_, _, query, options)         ⇒ Map("query" → QueryTranslator.data(query)) ++ SearchOptionsTranslator.data(options)
+      case StartScroll(_, _, query, _, options) ⇒ Map("query" → (QueryTranslator.data(query) + ("sort" → Seq("_doc")))) ++ SearchOptionsTranslator.data(options)
+      case x: Scroll[_]                         ⇒ Map("sort" → Seq("_doc"))
+      case ClearScroll(scrollIds)               ⇒ Map("scroll_id" → scrollIds)
     }
 
     def request(api: SearchApi) = api match {
 
-      case x: Search ⇒
+      case x: Search[_] ⇒
         val path = x match {
-          case Search(indices, types, _) if indices.isEmpty && types.isEmpty ⇒ "/_search"
-          case Search(indices, types, _) if types.isEmpty                    ⇒ s"/${indices.map(_.name).mkString(",")}/_search"
-          case Search(indices, types, _)                                     ⇒ s"/${indices.map(_.name).mkString(",")}/${types.map(_.name).mkString(",")}/_search"
+          case Search(indices, types, _, _) if indices.isEmpty && types.isEmpty ⇒ "/_search"
+          case Search(indices, types, _, _) if types.isEmpty                    ⇒ s"/${indices.map(_.name).mkString(",")}/_search"
+          case Search(indices, types, _, _)                                     ⇒ s"/${indices.map(_.name).mkString(",")}/${types.map(_.name).mkString(",")}/_search"
         }
         val params = if (x.indices.size > 1) Map("ignore_unavailable" → "true") else Map.empty[String, String]
         Request(POST, path, params)
 
-      case x: StartScroll ⇒ x match {
-        case StartScroll(index, tpe, _, ttl) ⇒
+      case x: StartScroll[_] ⇒ x match {
+        case StartScroll(index, tpe, _, ttl, _) ⇒
           Request(POST,
             path = s"/${index.name}/${tpe.name}/_search",
             params = Map("scroll" → s"${ttl.toSeconds}s")
           )
       }
 
-      case x: Scroll ⇒ x match {
+      case x: Scroll[_] ⇒ x match {
         case Scroll(id, ttl) ⇒
           println(s"scroll_id: $id")
           Request(GET,
@@ -48,13 +48,14 @@ object search {
     }
   }
 
-  private[translation] object SearchOptionsTranslator extends DataTranslator[Query] {
-    override def data(query: Query) = query match {
-      case QueryWithOptions(_, options) ⇒ Map.empty[String, Any] ++
-        options.from.map("from" → _) ++
-        options.size.map("size" → _) ++
-        Map("sort" → options.sorters.map(sortData))
-      case _                            ⇒ Map.empty
+  private[formatting] object SearchOptionsTranslator extends DataFormatter[Option[SearchOptions]] {
+    override def data(options: Option[SearchOptions]) = {
+      options.fold(Map.empty[String, Any]) { opts ⇒
+        Map.empty[String, Any] ++
+          opts.from.map("from" → _) ++
+          opts.size.map("size" → _) ++
+          Map("sort" → opts.sorters.map(sortData))
+      }
     }
 
     def sortData(sort: Sort): Any = sort match {

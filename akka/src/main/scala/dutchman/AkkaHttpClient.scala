@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers._
 import akka.stream.Materializer
 import akka.util.ByteString
 import dutchman.api._
+import dutchman.http._
 
 import scala.concurrent.Future
 
@@ -27,7 +28,7 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     }
   }
 
-  def execute[Json](endpoint: Endpoint)(request: Request)(implicit marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
+  def execute[Json](endpoint: Endpoint)(request: Request)(implicit unMarshaller: ApiUnMarshaller[Json]): Future[Json] = {
     http.singleRequest(buildRequest(endpoint, request)) flatMap { response =>
       response.entity.json { response ⇒
         val json = unMarshaller.read(response)

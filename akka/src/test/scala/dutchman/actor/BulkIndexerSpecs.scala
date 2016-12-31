@@ -3,10 +3,10 @@ package dutchman.actor
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import dutchman.{AkkaHttpClient, Endpoint}
+import dutchman.AkkaHttpClient
 import dutchman.api._
 import dutchman.circe._
-import dutchman.dsl._
+import dutchman.http.Endpoint
 import dutchman.model._
 import io.circe.generic.semiauto.deriveDecoder
 import org.scalatest.concurrent.ScalaFutures
@@ -54,7 +54,7 @@ class BulkIndexerSpecs extends TestKit(ActorSystem("BulkIndexerSpecs"))
   }
 
   override protected def afterAll(): Unit = {
-    client.indices(DeleteIndex(idx)).futureValue
+    client.deleteIndex(idx).futureValue
     TestKit.shutdownActorSystem(system)
   }
 }

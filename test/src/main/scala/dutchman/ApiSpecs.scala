@@ -1,11 +1,10 @@
 package dutchman
 
 import dutchman.api._
-import dutchman.dsl._
+import dutchman.document._
+import dutchman.http.{Endpoint, HttpClient}
 import dutchman.model.Person
 import dutchman.search._
-import dutchman.model.Person
-import dutchman.search.SearchSpecs
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpecLike}
@@ -17,12 +16,11 @@ trait ApiSpecs[Json]
     with Matchers
     with ScalaFutures
     with BeforeAndAfterEach
-    //    with IndexSpecs[Json]
-    //    with BulkSpecs[Json]
-    //    with SearchSpecs[Json]
-    //    with ScrollSpecs[Json]
-    //    with BoolSpecs[Json]
-{
+    with IndexSpecs[Json]
+    with BulkSpecs[Json]
+    with SearchSpecs[Json]
+    with ScrollSpecs[Json]
+    with BoolSpecs[Json] {
 
   val tpe = Type("person")
 
@@ -32,21 +30,21 @@ trait ApiSpecs[Json]
   implicit val marshaller: marshalling.ApiMarshaller
   implicit val unMarshaller: marshalling.ApiUnMarshaller[Json]
 
-  lazy implicit val dsl = httpClient.bind(Endpoint.localhost)
+  lazy implicit val client = httpClient.bind(Endpoint.localhost)
 
-  def deleteIndex(idx: Idx) = DeleteIndex(idx).task.futureValue
-  def refresh(index: Idx) = Refresh(index).task.futureValue
+  def deleteIndex(idx: Idx) = client.deleteIndex(idx).futureValue
+  def refresh(index: Idx) = client.refresh(Seq(index)).futureValue
 
   implicit val patience = PatienceConfig(timeout = scaled(Span(10, Seconds)), interval = scaled(Span(50, Millis)))
 
   "DocumentExists" when {
-    val index: Idx = "document_exists_test"
+    val idx: Idx = "document_exists_test"
     val tpe: Type = "document"
     val id: Id = "123"
 
     "a document doesn't exist" should {
       "return false" in {
-        DocumentExists(index, tpe, id) map { exists ⇒
+        client.documentExists(idx, tpe, id) map { exists ⇒
           exists shouldBe false
         }
       }
@@ -55,14 +53,16 @@ trait ApiSpecs[Json]
     "a document does exist" should {
       "return true" in {
 
-        val response = for {
-          _ ← Index(index, tpe, Document(id, Map("name" → "chris")), None)
-          _ ← Refresh(index)
-          e ← DocumentExists(index, tpe, id)
-          _ ← DeleteIndex(index)
+        val ops = client.ops
+
+        val api = for {
+          _ ← ops.index(idx, tpe, Document(id, Map("name" → "chris")), None)
+          _ ← ops.refresh(idx)
+          e ← ops.documentExists(idx, tpe, id)
+          _ ← ops.deleteIndex(idx)
         } yield e
 
-        response map { exists ⇒
+        client(api) map { exists ⇒
           exists shouldBe true
         }
       }

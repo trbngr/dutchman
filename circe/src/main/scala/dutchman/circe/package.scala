@@ -4,6 +4,7 @@ import cats.syntax.either._
 import dutchman.api._
 import dutchman.marshalling._
 import dutchman.marshalling.{ApiMarshaller, ApiUnMarshaller}
+import dutchman.api.formatting.DataContainer
 import io.circe._
 import io.circe.parser._
 import org.slf4j.LoggerFactory
@@ -14,9 +15,9 @@ package object circe {
 
   implicit object CirceMarshaller extends ApiMarshaller {
 
-    def marshal(api: Api) = api match {
-      case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
-      case _: Get     ⇒ ""
+    def marshal[A](api: Api[A]) = api match {
+      case bulk: Bulk[_] ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
+      case _: Get[_]     ⇒ ""
       case _: Delete  ⇒ ""
       case _          ⇒ api.data.toJson
     }
@@ -76,5 +77,8 @@ package object circe {
     def refresh(json: Json) = json.as[RefreshResponse].getOrElse(e("refresh"))
     def scroll(json: Json) = json.as[ScrollResponse[Json]].getOrElse(e("scroll"))
     def get(json: Json) = json.as[GetResponse[Json]].getOrElse(e("get"))
+    override def multiGet(json: Json) = ???
+    override def delete(json: Json) = ???
+    override def update(json: Json) = ???
   }
 }

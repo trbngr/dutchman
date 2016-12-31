@@ -1,5 +1,6 @@
 package dutchman
 
+import dutchman.http._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FlatSpecLike, Matchers}

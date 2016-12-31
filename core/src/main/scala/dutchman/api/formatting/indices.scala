@@ -1,14 +1,14 @@
-package dutchman.api.translation
+package dutchman.api.formatting
 
-import dutchman._
 import dutchman.api._
+import dutchman.http._
 
 object indices {
 
-  private[translation] object IndicesApiTranslator extends DataTranslator[IndicesApi] with RequestTranslator[IndicesApi] {
+  private[formatting] object IndicesApiFormatter extends DataFormatter[IndicesApi] with RequestFormatter[IndicesApi] {
     def data(api: IndicesApi) = api match {
-      case x: DeleteIndex ⇒ Map.empty
-      case x: Refresh     ⇒ Map.empty
+      case _: DeleteIndex ⇒ Map.empty
+      case _: Refresh     ⇒ Map.empty
     }
 
     def request(api: IndicesApi) = api match {

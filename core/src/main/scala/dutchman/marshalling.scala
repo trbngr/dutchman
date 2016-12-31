@@ -6,7 +6,7 @@ object marshalling {
   case class DecodingError(message: String) extends Exception(s"Error decoding json: $message")
 
   trait ApiMarshaller {
-    def marshal(api: Api): String
+    def marshal[A](api: Api[A]): String
   }
 
   trait ApiUnMarshaller[Json] {
@@ -15,10 +15,13 @@ object marshalling {
     def readError(json: Json): Option[Seq[ESError]]
     def get(json: Json): GetResponse[Json]
     def index(json: Json): IndexResponse
+    def multiGet(json: Json): MultiGetResponse
+    def delete(json: Json): DeleteResponse
     def deleteIndex(json: Json): DeleteIndexResponse
     def bulk(json: Json): Seq[BulkResponse]
     def search(json: Json): SearchResponse[Json]
     def refresh(json: Json): RefreshResponse
     def scroll(json: Json): ScrollResponse[Json]
+    def update(json: Json): UpdateResponse
   }
 }

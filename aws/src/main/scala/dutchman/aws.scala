@@ -8,6 +8,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 import com.amazonaws.auth._
+import dutchman.http._
 
 object aws {
 

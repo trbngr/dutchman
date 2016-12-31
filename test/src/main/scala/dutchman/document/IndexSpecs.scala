@@ -14,21 +14,29 @@ trait IndexSpecs[Json] {
 
     "it doesn't exist" should {
       "be created" in {
-        val api = Index(idx, tpe, person)
-        val response = dsl.document(api).futureValue
+        val ops = client.ops
+        val api = for {
+          r ← ops.index(idx, tpe, person)
+          _ ← ops.deleteIndex(idx)
+        } yield r
+
+        val response = client(api).futureValue
         response.created shouldBe true
-        deleteIndex(idx)
       }
     }
 
     "It already exists" should {
       "be not created" in {
-        val api = Index(idx, tpe, person)
-        whenReady(dsl.document(api)) { _ ⇒
-          val response = dsl.document(api).futureValue
-          response.created shouldBe false
-          deleteIndex(idx)
-        }
+
+        val ops = client.ops
+        val api = for {
+          _ ← ops.index(idx, tpe, person)
+          r ← ops.index(idx, tpe, person)
+          _ ← ops.deleteIndex(idx)
+        } yield r
+
+        val response = client(api).futureValue
+        response.created shouldBe false
       }
     }
   }

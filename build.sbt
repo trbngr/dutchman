@@ -2,13 +2,13 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.5.11",
+  version := "1.0.2",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
-  scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions"),
+  scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds"),
   testOptions in Test += Tests.Argument("-oD"),
 
   //Let CTRL+C kill the current task and not the whole SBT session.

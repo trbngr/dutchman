@@ -6,8 +6,6 @@ trait query {
 
   sealed trait Query
 
-  case class QueryWithOptions(query: Query, options: SearchOptions) extends Query
-
   case class MatchAll(boost: Double = 0) extends Query
   case class Prefix(field: String, value: String, boost: Double = 0) extends Query
   case class Wildcard(field: String, value: String, boost: Double = 0) extends Query

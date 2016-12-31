@@ -1,13 +1,12 @@
-package dutchman.api.translation
+package dutchman.api.formatting
 
 import dutchman.api._
 
 object query {
 
-  private[translation] object QueryTranslator extends DataTranslator[Query] {
+  private[formatting] object QueryTranslator extends DataFormatter[Query] {
     def data(query: Query): DataContainer = {
       query match {
-        case QueryWithOptions(q, _) ⇒ QueryTranslator.data(q)
 
         case x: MatchAll ⇒ x match {
           case MatchAll(boost) if boost > 0 ⇒ Map("match_all" → Map("boost" → boost))

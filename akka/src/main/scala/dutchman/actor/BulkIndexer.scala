@@ -2,8 +2,8 @@ package dutchman.actor
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
+import dutchman.ESClient
 import dutchman.api._
-import dutchman.dsl._
 import dutchman.marshalling._
 
 import scala.collection.immutable.Queue
@@ -15,14 +15,14 @@ object BulkIndexer {
   case class DocumentIndexed(response: BulkResponse)
   case class DocumentNotIndexed(cause: String, action: BulkAction, api: SingleDocumentApi)
 
-  def props[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit marshaller: ApiMarshaller): Props = {
+  def props[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit marshaller: ApiMarshaller): Props = {
     Props(new BulkIndexer[Json](client, config))
   }
 
-  def props[Json](client: Dsl[Json])(implicit marshaller: ApiMarshaller): Props = props(client, BulkIndexerConfig())
+  def props[Json](client: ESClient[Json])(implicit marshaller: ApiMarshaller): Props = props(client, BulkIndexerConfig())
 }
 
-class BulkIndexer[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit val marshaller: ApiMarshaller) extends Actor {
+class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig)(implicit val marshaller: ApiMarshaller) extends Actor {
 
   import BulkIndexer._
   import akka.pattern.pipe
@@ -56,17 +56,15 @@ class BulkIndexer[Json](client: Dsl[Json], config: BulkIndexerConfig)(implicit v
   def flush(force: Boolean = false) = {
     if ((force || queue.size == config.maxDocuments) && queue.nonEmpty) {
 
-      val api = Bulk(queue.map { case (action, docApi, _) ⇒ action → docApi }: _*)
+      val bulkActions = queue.map { case (action, docApi, _) ⇒ action → docApi }
 
       val bulkSession = queue
       queue = Queue.empty[(BulkAction, SingleDocumentApi, ActorRef)]
 
-      val payloadSize = api.request.payload.length / 1024.0 / 1024
+      log.info(f"Flushing ${queue.size} messages.")
 
-      log.info(f"Flushing ${api.actions.size} messages ($payloadSize%.2fMB).")
-
-      client.document(api) map { response ⇒
-        log.info(f"Flushed ${response.size} messages ($payloadSize%.2fMB).")
+      client.bulk(bulkActions: _*) map { response ⇒
+        log.info(f"Flushed ${response.size} messages.")
         if (response.size == bulkSession.size) {
           IndexingSuccessful(response.zip(bulkSession) map {
             case (bulkResponse, (action, docApi, replyTo)) => (action, docApi, bulkResponse, replyTo)

@@ -7,7 +7,7 @@ object testMarshalling extends testMarshalling
 
 trait testMarshalling {
   implicit object marshaller extends ApiMarshaller {
-    override def marshal(api: Api) = ""
+    override def marshal[A](api: Api[A]) = ""
   }
 
   implicit object unMarshaller extends ApiUnMarshaller[String]{
@@ -20,5 +20,9 @@ trait testMarshalling {
     override def search(json: String) = ???
     override def refresh(json: String) = ???
     override def scroll(json: String) = ???
+    override def get(json: String) = ???
+    override def multiGet(json: String) = ???
+    override def delete(json: String) = ???
+    override def update(json: String) = ???
   }
 }
