@@ -1,6 +1,3 @@
-import cats.free.Free
-import cats.instances.future._
-import cats.~>
 import dutchman.api._
 import dutchman.http._
 import dutchman.marshalling._
@@ -10,6 +7,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 package object dutchman {
 
+  import cats.free.Free
+  import cats.instances.future._
+  import cats.~>
+
   type ESApi[A] = Free[Api, A]
 
   implicit class RichHttpClient[Json](client: HttpClient)(implicit ec: ExecutionContext, writer: OperationWriter, reader: ResponseReader[Json]) {
@@ -17,7 +18,8 @@ package object dutchman {
   }
 
   final class ESClient[Json](client: HttpClient, endpoint: Endpoint, signer: ESRequestSigner)
-                            (implicit ec: ExecutionContext, writer: OperationWriter, reader: ResponseReader[Json]) extends OperationDefinitions[Json, Future] {
+                            (implicit ec: ExecutionContext, writer: OperationWriter, reader: ResponseReader[Json])
+    extends OperationDefinitions[Json, Future] {
 
     private def request[A](api: Api[A], fx: Json ⇒ A): Future[A] = {
       val request = signer.sign(endpoint, formatting.apiRequest(api))
