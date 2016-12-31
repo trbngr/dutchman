@@ -20,16 +20,12 @@ object aws {
 
   implicit class RequestUrlBuilder(request: Request){
     def url(endpoint: Endpoint) = {
-      val protocol = endpoint.port match {
-        case 443 => "https"
-        case _   => "http"
-      }
       val query = for {
         (name, value) <- request.params
         encodedValue = URLEncoder.encode(value, "UTF8")
       } yield name + "=" + encodedValue
 
-      new URL(protocol, endpoint.host, endpoint.port, s"${request.path}${query.mkString("?", "&", "")}")
+      new URL(endpoint.protocol, endpoint.host, endpoint.port, s"${request.path}${query.mkString("?", "&", "")}")
     }
   }
 
@@ -61,16 +57,16 @@ object aws {
     val xAmzSecurityToken = "X-Amz-Security-Token"
 
     def addSessionToken(request: Request): Request = awsCredentials match {
-      case (sc: AWSSessionCredentials) => request.copy(
+      case (sc: AWSSessionCredentials) ⇒ request.copy(
         headers = Header(xAmzSecurityToken, sc.getSessionToken) +: request.headers
       )
-      case _                           => request
+      case _                           ⇒ request
     }
 
     private[aws] def completedRequest(url: URL, request: Request, dateTimeStr: String): Request = {
       val headers = request.headers
       // Add a date and host header, but only if they aren't already there
-      val dateHeader = if (headers.exists(header => Set(xAmzDate.toLowerCase, "date").contains(header.name.toLowerCase))) {
+      val dateHeader = if (headers.exists(header ⇒ Set(xAmzDate.toLowerCase, "date").contains(header.name.toLowerCase))) {
         Seq()
       } else {
         Seq(Header(xAmzDate, dateTimeStr))
@@ -153,13 +149,13 @@ object aws {
           val parts = x.split("=")
           (parts(0), parts(1))
         }
-        val sortedEncoded = params.toList.map(kv => (urlEncode(kv._1), urlEncode(kv._2))).sortBy(_._1)
-        sortedEncoded.map(kv => s"${kv._1}=${kv._2}").mkString("&")
+        val sortedEncoded = params.toList.map(kv ⇒ (urlEncode(kv._1), urlEncode(kv._2))).sortBy(_._1)
+        sortedEncoded.map(kv ⇒ s"${kv._1}=${kv._2}").mkString("&")
       }
     }
 
     private def canonicalHeaders(request: Request): String = {
-      request.headers.sortBy(_.name.toLowerCase).map(header => s"${header.name.toLowerCase}:${header.value.trim}").mkString("\n") + "\n"
+      request.headers.sortBy(_.name.toLowerCase).map(header ⇒ s"${header.name.toLowerCase}:${header.value.trim}").mkString("\n") + "\n"
     }
 
     private def signedHeaders(request: Request): String = {

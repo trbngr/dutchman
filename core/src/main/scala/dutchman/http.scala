@@ -1,7 +1,5 @@
 package dutchman
 
-import dutchman.marshalling.ResponseReader
-
 import scala.concurrent.Future
 
 object http {
@@ -19,8 +17,15 @@ object http {
   object Endpoint {
     val localhost: Endpoint = localhost(9200)
     def localhost(port: Int): Endpoint = Endpoint("localhost", port)
+    def aws(host: String): Endpoint = Endpoint(host, 443)
   }
-  case class Endpoint(host: String, port: Int)
+
+  case class Endpoint(host: String, port: Int) {
+    def protocol = port match {
+      case 443 ⇒ "https"
+      case _   ⇒ "http"
+    }
+  }
 
   trait ESRequestSigner {
     def sign(endpoint: Endpoint, request: Request): Request

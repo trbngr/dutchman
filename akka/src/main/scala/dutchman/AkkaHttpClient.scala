@@ -48,10 +48,7 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
 
   private implicit class RequestUriBuilder(request: Request) {
     def uri(endpoint: Endpoint) = Uri.from(
-      scheme = endpoint.port match {
-        case 443 => "https"
-        case _   => "http"
-      },
+      scheme = endpoint.protocol,
       host = endpoint.host,
       port = endpoint.port,
       path = request.path,

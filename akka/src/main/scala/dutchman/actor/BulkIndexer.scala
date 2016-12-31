@@ -66,14 +66,14 @@ class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig) exten
         log.info(f"Flushed ${response.size} messages.")
         if (response.size == bulkSession.size) {
           IndexingSuccessful(response.zip(bulkSession) map {
-            case (bulkResponse, (action, docApi, replyTo)) => (action, docApi, bulkResponse, replyTo)
+            case (bulkResponse, (action, docApi, replyTo)) ⇒ (action, docApi, bulkResponse, replyTo)
           })
         } else {
           log.error(s"Number of responses ${response.size} != requests(${bulkSession.length}).")
           IndexingFailure("Response count mismatch.", bulkSession)
         }
       } recover {
-        case e: Throwable =>
+        case e: Throwable ⇒
           log.error(s"Failed to flush ${bulkSession.size} messages.", e)
           IndexingFailure(e.getMessage, bulkSession)
       } pipeTo self

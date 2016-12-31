@@ -23,8 +23,8 @@ package object dutchman {
 
     private def request[A](api: Api[A], fx: Json ⇒ A): Future[A] = {
       val request = signer.sign(endpoint, formatting.apiRequest(api))
-      client.execute(endpoint)(request) map { jsonStr ⇒
-        val json = reader.read(jsonStr)
+      client.execute(endpoint)(request) map { response ⇒
+        val json = reader.read(response)
         reader.readError(json) match {
           case Some(errors) ⇒ throw ESErrorsException(errors)
           case _            ⇒ fx(json)
