@@ -26,13 +26,16 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
   }
 
   def execute(endpoint: Endpoint)(request: Request): Future[String] = {
-    http.singleRequest(buildRequest(endpoint, request)).flatMap(_.entity.json)
+    http.singleRequest(buildRequest(endpoint, request)) flatMap {response ⇒
+      response.entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
+    }
   }
 
   private def buildRequest(endpoint: Endpoint, request: Request, includeEntity: Boolean = true): HttpRequest = {
     val entity = HttpEntity(request.payload)
     val uri = request.uri(endpoint)
-    val unauthed = {
+
+    val httpRequest = {
       val req = HttpRequest(method = request.verb, uri = uri)
       if (includeEntity)
         req.copy(entity = entity)
@@ -43,7 +46,7 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     val hostHeader = request.headers.find(_.name == "Host").map(x ⇒ Host(x.value))
     val headers = request.headers.filterNot(_.name == "Host").map(x ⇒ RawHeader(x.name, x.value)) ++ hostHeader
 
-    unauthed.withHeaders(headers: _*)
+    httpRequest.withHeaders(headers: _*)
   }
 
   private implicit class RequestUriBuilder(request: Request) {
@@ -62,11 +65,5 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     case PUT    ⇒ HttpMethods.PUT
     case DELETE ⇒ HttpMethods.DELETE
     case HEAD   ⇒ HttpMethods.HEAD
-  }
-
-  private implicit class entityToJson(entity: HttpEntity) {
-    def json: Future[String] = {
-      entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
-    }
   }
 }
