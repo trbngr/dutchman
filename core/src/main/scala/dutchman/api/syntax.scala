@@ -12,17 +12,20 @@ trait syntax {
   implicit def stringsToIndices(s: Seq[String]): Seq[Idx] = s.map(stringToIdx)
   implicit def stringsToTypes(s: Seq[String]): Seq[Type] = s.map(stringToType)
 
-  implicit class RichBulk[A](api: Api[A]) {
-    def bulkData: Seq[DataContainer] = apiData(api).get("actions") collect {
-      case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
-    } getOrElse (throw new RuntimeException("invalid bulk data"))
-  }
-
   implicit class RichApi[A](api: Api[A]) {
     def data: DataContainer = api match {
-      case _: Bulk ⇒ throw new UnsupportedOperationException("Use bulkData instead.")
+      case _: Bulk ⇒ throw new UnsupportedOperationException("For the Bulk operation, use bulkData instead.")
       case _       ⇒ apiData(api)
     }
+
+    def bulkData: Seq[DataContainer] =
+      api match {
+        case _: Bulk ⇒ apiData(api).get("actions") collect {
+          case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
+        } getOrElse (throw new RuntimeException("invalid bulk data"))
+        case _ ⇒ throw new UnsupportedOperationException("For operations other than Bulk, use data instead.")
+      }
+
     def request(implicit writer: OperationWriter): Request = apiRequest(api)
   }
 }
