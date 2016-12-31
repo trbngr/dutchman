@@ -17,7 +17,7 @@ package object dutchman {
   }
 
   final class ESClient[Json](client: HttpClient, endpoint: Endpoint, signer: ESRequestSigner)
-                         (implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]) extends OperationDefinitions[Json, Future] {
+                            (implicit ec: ExecutionContext, marshaller: ApiMarshaller, unMarshaller: ApiUnMarshaller[Json]) extends OperationDefinitions[Json, Future] {
 
     private def request[A](api: Api[A], fx: Json ⇒ A): Future[A] = {
       val request = signer.sign(endpoint, formatting.apiRequest(api))
@@ -27,7 +27,7 @@ package object dutchman {
     private val compiler = new (Api ~> Future) {
       def apply[A](fa: Api[A]) = {
         val future = fa match {
-          case x: Bulk[_]        ⇒ request(x, unMarshaller.bulk)
+          case x: Bulk           ⇒ request(x, unMarshaller.bulk)
           case x: ClearScroll    ⇒ request(x, _ ⇒ ())
           case x: Delete         ⇒ request(x, unMarshaller.delete)
           case x: DeleteIndex    ⇒ request(x, unMarshaller.deleteIndex)
@@ -47,7 +47,7 @@ package object dutchman {
     }
 
     def apply[A](api: ESApi[A]): Future[A] = execute(api)
-    private def execute[A](api: ESApi[A]): Future[A] = api.foldMap(compiler)
+    def execute[A](api: ESApi[A]): Future[A] = api.foldMap(compiler)
 
     val ops = new Operations[Json]
 

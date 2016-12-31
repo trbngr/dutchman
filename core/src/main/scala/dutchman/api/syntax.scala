@@ -20,8 +20,8 @@ trait syntax {
 
   implicit class RichApi[A](api: Api[A]) {
     def data: DataContainer = api match {
-      case _: Bulk[_] ⇒ throw new UnsupportedOperationException("Use bulkData instead.")
-      case _          ⇒ apiData(api)
+      case _: Bulk ⇒ throw new UnsupportedOperationException("Use bulkData instead.")
+      case _       ⇒ apiData(api)
     }
     def request(implicit marshaller: ApiMarshaller): Request = apiRequest(api)
   }

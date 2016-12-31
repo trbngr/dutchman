@@ -19,7 +19,7 @@ object document {
         case (index, _, _)                ⇒ Map("_index" → index.name)
       })
 
-      case v: Bulk[_] ⇒
+      case v: Bulk ⇒
         val actions = v.actions.flatMap {
           case (action, bulkApi) ⇒
             val name = action match {
@@ -46,7 +46,7 @@ object document {
       case op: Delete                     ⇒ Request(DELETE, s"/${op.index.name}/${op.`type`.name}/${op.id.value}", Map() ++ op.version.map(v ⇒ "version" → v.toString))
       case Update(index, tpe, document)   ⇒ Request(PUT, s"/${index.name}/${tpe.name}/${document.id.value}")
       case _: MultiGet                    ⇒ Request(GET, "/_mget")
-      case _: Bulk[_]                     ⇒ Request(POST, "/_bulk")
+      case _: Bulk                        ⇒ Request(POST, "/_bulk")
       case DocumentExists(index, tpe, id) ⇒ Request(HEAD, s"/${index.name}/${tpe.name}/${id.value}")
     }
   }

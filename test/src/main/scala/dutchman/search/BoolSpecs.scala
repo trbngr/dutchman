@@ -13,7 +13,7 @@ trait BoolSpecs[Json] {
 
   val boolSpecsIndexActions = (1 to 10) map { i ⇒
     val prefix = if (i % 2 == 0) "even" else "odd"
-    Bulk(
+    BulkAction(
       Index(idx, tpe, Person(
         id = Random.alphanumeric.take(3).mkString,
         name = s"$prefix-${Random.alphanumeric.take(3).mkString}",

@@ -18,7 +18,7 @@ trait SearchSpecs[Json] {
       city = Random.alphanumeric.take(3).mkString
     )
 
-    Bulk(Index(idx, tpe, person))
+    BulkAction(Index(idx, tpe, person))
   }
 
   "PrefixQuery" when {

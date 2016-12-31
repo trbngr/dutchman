@@ -7,7 +7,6 @@ package object api extends search with query with syntax {
   sealed trait Api[+A]
   sealed trait DocumentApi
   sealed trait SingleDocumentApi extends DocumentApi
-  sealed trait BulkAction
   sealed trait IndicesApi
   sealed trait SearchApi
 
@@ -51,19 +50,19 @@ package object api extends search with query with syntax {
   case class Update(index: Idx, `type`: Type, document: Document) extends Api[UpdateResponse] with SingleDocumentApi
   case class MultiGet(ids: (Idx, Option[Type], Option[Id])*) extends Api[MultiGetResponse] with DocumentApi
 
+  sealed trait BulkAction
   case object BulkIndex extends BulkAction
   case object BulkCreate extends BulkAction
   case object BulkDelete extends BulkAction
   case object BulkUpdate extends BulkAction
 
-  object Bulk {
-    def apply(c: Index, create: Boolean = false): (BulkAction, Index) = (if (create) BulkCreate else BulkIndex) → c
-    def apply(c: Update): (BulkAction, Update) = BulkUpdate → c
-    def apply(c: Delete): (BulkAction, Delete) = BulkDelete → c
+  object BulkAction {
+    def apply(c: Index, create: Boolean = false): (BulkAction, SingleDocumentApi) = (if (create) BulkCreate else BulkIndex) → c
+    def apply(c: Update): (BulkAction, SingleDocumentApi) = BulkUpdate → c
+    def apply(c: Delete): (BulkAction, SingleDocumentApi) = BulkDelete → c
   }
 
-  case class Bulk[A](actions: (BulkAction, SingleDocumentApi)*) extends Api[Seq[BulkResponse]] with DocumentApi
-
+  case class Bulk(actions: (BulkAction, SingleDocumentApi)*) extends Api[Seq[BulkResponse]] with DocumentApi
   case class BulkResponse(action: BulkAction, status: Int, response: Response)
 
   case class IndexResponse(created: Boolean, response: Response)

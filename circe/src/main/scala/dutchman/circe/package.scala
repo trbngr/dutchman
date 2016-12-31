@@ -16,7 +16,7 @@ package object circe {
   implicit object CirceMarshaller extends ApiMarshaller {
 
     def marshal[A](api: Api[A]) = api match {
-      case bulk: Bulk[_] ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
+      case bulk: Bulk ⇒ bulk.bulkData.map(_.toJson) mkString("", "\n", "\n")
       case _: Get[_]     ⇒ ""
       case _: Delete  ⇒ ""
       case _          ⇒ api.data.toJson
@@ -77,8 +77,8 @@ package object circe {
     def refresh(json: Json) = json.as[RefreshResponse].getOrElse(e("refresh"))
     def scroll(json: Json) = json.as[ScrollResponse[Json]].getOrElse(e("scroll"))
     def get(json: Json) = json.as[GetResponse[Json]].getOrElse(e("get"))
-    override def multiGet(json: Json) = ???
-    override def delete(json: Json) = ???
-    override def update(json: Json) = ???
+    def multiGet(json: Json) = ???
+    def delete(json: Json) = ???
+    def update(json: Json) = ???
   }
 }

@@ -12,7 +12,7 @@ trait ScrollSpecs[Json] {
   private[this] val idx: Idx = "scroll_specs"
 
   val scrollSpecsIndexActions = (1 to 10) map { i ⇒
-    Bulk(
+    BulkAction(
       Index(idx, tpe, Person(
         id = Random.alphanumeric.take(3).mkString,
         name = s"${if (i % 2 == 0) "even" else "odd"}-${Random.alphanumeric.take(3).mkString}",

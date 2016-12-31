@@ -15,7 +15,7 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
   "Bulk" when {
     "updating a non-existing document" should {
       "?" in {
-        val action = Bulk(Update(idx, tpe, Person("123", "Frank", "Philly")))
+        val action = BulkAction(Update(idx, tpe, Person("123", "Frank", "Philly")))
         val ops = client.ops
         val api = for {
           r ← ops.bulk(Seq(action): _*)
@@ -30,7 +30,7 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
     "index" should {
       "?" in {
         val actions = (1 to 10) map { _ ⇒
-          Bulk(Index(idx, tpe, Person(
+          BulkAction(Index(idx, tpe, Person(
             id = Random.alphanumeric.take(3).mkString,
             name = Random.alphanumeric.take(3).mkString,
             city = Random.alphanumeric.take(3).mkString
