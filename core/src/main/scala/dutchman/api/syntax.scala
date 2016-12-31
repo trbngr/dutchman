@@ -18,13 +18,12 @@ trait syntax {
       case _       ⇒ apiData(api)
     }
 
-    def bulkData: Seq[DataContainer] =
-      api match {
-        case _: Bulk ⇒ apiData(api).get("actions") collect {
-          case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
-        } getOrElse (throw new RuntimeException("invalid bulk data"))
-        case _ ⇒ throw new UnsupportedOperationException("For operations other than Bulk, use data instead.")
-      }
+    def bulkData: Seq[DataContainer] = api match {
+      case _: Bulk ⇒ apiData(api).get("actions") collect {
+        case c: Seq[_] ⇒ c.asInstanceOf[Seq[DataContainer]]
+      } getOrElse (throw new RuntimeException("invalid bulk data"))
+      case _       ⇒ throw new UnsupportedOperationException("For operations other than Bulk, use data instead.")
+    }
 
     def request(implicit writer: OperationWriter): Request = apiRequest(api)
   }
