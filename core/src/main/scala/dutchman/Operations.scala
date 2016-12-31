@@ -1,5 +1,6 @@
 package dutchman
 
+import cats.free.Free
 import dutchman.api._
 
 import scala.concurrent.duration._
@@ -13,7 +14,11 @@ class Operations[Json] extends OperationDefinitions[Json, ESApi] {
     liftF(api)
   }
 
-  def clearScroll(scrollIds: Set[String]): ESApi[Unit] = liftF(ClearScroll(scrollIds))
+  def clearScroll(scrollId: String): ESApi[Unit] =
+    liftF(ClearScroll(Set(scrollId)))
+
+  def clearScroll(scrollIds: Set[String]): ESApi[Unit] =
+    liftF(ClearScroll(scrollIds))
 
   def delete(index: Idx, `type`: Type, id: Id, version: Option[Int]): ESApi[DeleteResponse] =
     liftF(Delete(index, `type`, id, version))
@@ -30,7 +35,7 @@ class Operations[Json] extends OperationDefinitions[Json, ESApi] {
   }
 
   def index[A: ESDocument](index: Idx, `type`: Type, document: A, version: Option[Int] = None): ESApi[IndexResponse] =
-    liftF(Index(index, `type`, document, version))
+    liftF(Index(index, `type`, implicitly[ESDocument[A]].document(document), version))
 
   def multiGet(ids: (Idx, Option[Type], Option[Id])*): ESApi[MultiGetResponse] =
     liftF(MultiGet(ids: _*))
@@ -38,7 +43,8 @@ class Operations[Json] extends OperationDefinitions[Json, ESApi] {
   def refresh(indices: Seq[Idx]): ESApi[RefreshResponse] =
     liftF(Refresh(indices))
 
-  def refresh(index: Idx): ESApi[RefreshResponse] = liftF(Refresh(Seq(index)))
+  def refresh(index: Idx): ESApi[RefreshResponse] =
+    liftF(Refresh(Seq(index)))
 
   def scroll(scrollId: String, ttl: FiniteDuration = 1 minute): ESApi[ScrollResponse[Json]] = {
     val api: Api[ScrollResponse[Json]] = Scroll(scrollId, ttl)
@@ -46,30 +52,29 @@ class Operations[Json] extends OperationDefinitions[Json, ESApi] {
   }
 
   def startScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute, options: Option[SearchOptions]): ESApi[ScrollResponse[Json]] = {
-
     val api: Api[ScrollResponse[Json]] = StartScroll(index, `type`, query, ttl, options)
     liftF(api)
   }
 
   def update[A: ESDocument](index: Idx, `type`: Type, document: A): ESApi[UpdateResponse] =
-    liftF(Update(index, `type`, document))
+    liftF(Update(index, `type`, implicitly[ESDocument[A]].document(document)))
 
-  def search(indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]) = {
+  def search(indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]): ESApi[SearchResponse[Json]] = {
     val api: Api[SearchResponse[Json]] = Search(indices, types, query, options)
     liftF(api)
   }
 
-  def search(index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]) = {
+  def search(index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]): ESApi[SearchResponse[Json]] = {
     val api: Api[SearchResponse[Json]] = Search(Seq(index), Seq(`type`), query, options)
     liftF(api)
   }
 
-  def search(index: Idx, types: Seq[Type], query: Query, options: Option[SearchOptions]) = {
+  def search(index: Idx, types: Seq[Type], query: Query, options: Option[SearchOptions]): ESApi[SearchResponse[Json]] = {
     val api: Api[SearchResponse[Json]] = Search(Seq(index), types, query, options)
     liftF(api)
   }
 
-  def search(indices: Seq[Idx], `type`: Type, query: Query, options: Option[SearchOptions]) = {
+  def search(indices: Seq[Idx], `type`: Type, query: Query, options: Option[SearchOptions]): ESApi[SearchResponse[Json]] = {
     val api: Api[SearchResponse[Json]] = Search(indices, Seq(`type`), query, options)
     liftF(api)
   }

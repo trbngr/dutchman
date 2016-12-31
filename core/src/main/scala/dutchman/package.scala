@@ -61,23 +61,59 @@ package object dutchman {
 
     val ops = new Operations[Json]
 
-    def bulk(actions: (BulkAction, SingleDocumentApi)*) = execute(ops.bulk(actions: _*))
-    def clearScroll(scrollIds: Set[String]) = execute(ops.clearScroll(scrollIds))
-    def delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) = execute(ops.delete(index, `type`, id, version))
-    def deleteIndex(index: Idx) = execute(ops.deleteIndex(index))
-    def documentExists(index: Idx, `type`: Type, id: Id) = execute(ops.documentExists(index, `type`, id))
-    def get(index: Idx, `type`: Type, id: Id) = execute(ops.get(index, `type`, id))
-    def index[A: ESDocument](index: Idx, `type`: Type, document: A, version: Option[Int]) = execute(ops.index(index, `type`, document, version))
-    def multiGet(ids: (Idx, Option[Type], Option[Id])*) = execute(ops.multiGet(ids: _*))
-    def refresh(indices: Seq[Idx]) = execute(ops.refresh(indices))
-    def refresh(index: Idx) = execute(ops.refresh(index))
-    def scroll(scrollId: String, ttl: FiniteDuration) = execute(ops.scroll(scrollId, ttl))
-    def search(index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]) = execute(ops.search(index, `type`, query, options))
-    def search(index: Idx, types: Seq[Type], query: Query, options: Option[SearchOptions]) = execute(ops.search(index, types, query, options))
-    def search(indices: Seq[Idx], `type`: Type, query: Query, options: Option[SearchOptions]) = execute(ops.search(indices, `type`, query, options))
-    def search(indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]) = execute(ops.search(indices, types, query, options))
-    def startScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration, options: Option[SearchOptions]) = execute(ops.startScroll(index, `type`, query, ttl, options))
-    def update[A: ESDocument](index: Idx, `type`: Type, document: A) = execute(ops.update(index, `type`, document))
+    def bulk(actions: (BulkAction, SingleDocumentApi)*): Future[Seq[BulkResponse]] =
+      execute(ops.bulk(actions: _*))
+
+    def clearScroll(scrollId: String): Future[Unit] =
+      execute(ops.clearScroll(scrollId))
+
+    def clearScroll(scrollIds: Set[String]): Future[Unit] =
+      execute(ops.clearScroll(scrollIds))
+
+    def delete(index: Idx, `type`: Type, id: Id, version: Option[Int]): Future[DeleteResponse] =
+      execute(ops.delete(index, `type`, id, version))
+
+    def deleteIndex(index: Idx): Future[DeleteIndexResponse] =
+      execute(ops.deleteIndex(index))
+
+    def documentExists(index: Idx, `type`: Type, id: Id): Future[Boolean] =
+      execute(ops.documentExists(index, `type`, id))
+
+    def get(index: Idx, `type`: Type, id: Id): Future[GetResponse[Json]] =
+      execute(ops.get(index, `type`, id))
+
+    def index[A: ESDocument](index: Idx, `type`: Type, document: A, version: Option[Int]): Future[IndexResponse] =
+      execute(ops.index(index, `type`, document, version))
+
+    def multiGet(ids: (Idx, Option[Type], Option[Id])*): Future[MultiGetResponse] =
+      execute(ops.multiGet(ids: _*))
+
+    def refresh(indices: Seq[Idx]): Future[RefreshResponse] =
+      execute(ops.refresh(indices))
+
+    def refresh(index: Idx): Future[RefreshResponse] =
+      execute(ops.refresh(index))
+
+    def scroll(scrollId: String, ttl: FiniteDuration): Future[ScrollResponse[Json]] =
+      execute(ops.scroll(scrollId, ttl))
+
+    def search(index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]): Future[SearchResponse[Json]] =
+      execute(ops.search(index, `type`, query, options))
+
+    def search(index: Idx, types: Seq[Type], query: Query, options: Option[SearchOptions]): Future[SearchResponse[Json]] =
+      execute(ops.search(index, types, query, options))
+
+    def search(indices: Seq[Idx], `type`: Type, query: Query, options: Option[SearchOptions]): Future[SearchResponse[Json]] =
+      execute(ops.search(indices, `type`, query, options))
+
+    def search(indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]): Future[SearchResponse[Json]] =
+      execute(ops.search(indices, types, query, options))
+
+    def startScroll(index: Idx, `type`: Type, query: Query, ttl: FiniteDuration, options: Option[SearchOptions]): Future[ScrollResponse[Json]] =
+      execute(ops.startScroll(index, `type`, query, ttl, options))
+
+    def update[A: ESDocument](index: Idx, `type`: Type, document: A): Future[UpdateResponse] =
+      execute(ops.update(index, `type`, document))
   }
 
 }

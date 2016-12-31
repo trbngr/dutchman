@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 
 trait OperationDefinitions[Json, Ret[_]] {
   def bulk(actions: (BulkAction, SingleDocumentApi)*): Ret[Seq[BulkResponse]]
+  def clearScroll(scrollId: String): Ret[Unit]
   def clearScroll(scrollIds: Set[String]): Ret[Unit]
   def delete(index: Idx, `type`: Type, id: Id, version: Option[Int]): Ret[DeleteResponse]
   def deleteIndex(index: Idx): Ret[DeleteIndexResponse]
