@@ -6,7 +6,7 @@ import dutchman.http._
 import org.scalatest.{FlatSpec, Matchers}
 
 class SignerSpecs extends FlatSpec with Matchers {
-  val signer: ESRequestSigner = AWSSigner(new BasicAWSCredentials("keyid", "key"), "us-west-2")
+  val signer = AWSSigner(new BasicAWSCredentials("keyid", "key"), "us-west-2")
 
   "signing" should "work" in {
     val request = signer.sign(Endpoint.localhost, Request(GET, "/_bulk", Map("version" → "2")))

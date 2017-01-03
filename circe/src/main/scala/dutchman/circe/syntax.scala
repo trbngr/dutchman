@@ -1,7 +1,7 @@
 package dutchman.circe
 
 import cats.syntax.either._
-import dutchman.api._
+import dutchman.dsl._
 import io.circe.parser.parse
 import io.circe.{ACursor, Decoder, DecodingFailure, Json}
 

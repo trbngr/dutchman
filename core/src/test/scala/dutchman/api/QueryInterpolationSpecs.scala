@@ -1,5 +1,6 @@
 package dutchman.api
 
+import dutchman.dsl._
 import org.scalatest.{Matchers, WordSpec}
 
 class QueryInterpolationSpecs extends WordSpec with Matchers {

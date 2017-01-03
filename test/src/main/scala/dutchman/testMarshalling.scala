@@ -1,13 +1,15 @@
 package dutchman
 
 import dutchman.api._
+import dutchman.dsl.ESError
 import marshalling._
 
 object testMarshalling extends testMarshalling
 
 trait testMarshalling {
-  implicit object writer extends OperationWriter {
-    override def write[A](api: Api[A]) = ""
+  implicit object writer extends ApiDataWriter {
+    override def write(data: ApiData) = ""
+    override def write(data: Seq[ApiData]) = ""
   }
 
   implicit object reader extends ResponseReader[String]{
@@ -19,7 +21,6 @@ trait testMarshalling {
     override def bulk(json: String) = ???
     override def search(json: String) = ???
     override def refresh(json: String) = ???
-    override def scroll(json: String) = ???
     override def get(json: String) = ???
     override def multiGet(json: String) = ???
     override def delete(json: String) = ???

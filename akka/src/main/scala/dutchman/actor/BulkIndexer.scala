@@ -1,49 +1,50 @@
 package dutchman.actor
 
 import akka.actor.{Actor, ActorRef, Props}
+import akka.pattern.pipe
 import akka.event.Logging
-import dutchman.ESClient
-import dutchman.api._
+import dutchman.ElasticClient
+import dutchman.dsl.BulkAction
+import dutchman.dsl._
 
 import scala.collection.immutable.Queue
 
 object BulkIndexer {
   case object Flush
-  case class IndexingSuccessful(data: Seq[(BulkAction, SingleDocumentApi, BulkResponse, ActorRef)])
-  case class IndexingFailure(error: String, data: Seq[(BulkAction, SingleDocumentApi, ActorRef)])
+  case class IndexingSuccessful(data: Seq[(BulkAction, BulkActionable, BulkResponse, ActorRef)])
+  case class IndexingFailure(error: String, data: Seq[(BulkAction, BulkActionable, ActorRef)])
   case class DocumentIndexed(response: BulkResponse)
-  case class DocumentNotIndexed(cause: String, action: BulkAction, api: SingleDocumentApi)
+  case class DocumentNotIndexed(cause: String, action: BulkAction, api: BulkActionable)
 
-  def props[Json](client: ESClient[Json], config: BulkIndexerConfig): Props = {
+  def props[Json](client: ElasticClient[Json], config: BulkIndexerConfig): Props = {
     Props(new BulkIndexer[Json](client, config))
   }
 
-  def props[Json](client: ESClient[Json]): Props = props(client, BulkIndexerConfig())
+  def props[Json](client: ElasticClient[Json]): Props = props(client, BulkIndexerConfig())
 }
 
-class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig) extends Actor {
+class BulkIndexer[Json](client: ElasticClient[Json], config: BulkIndexerConfig) extends Actor {
 
   import BulkIndexer._
-  import akka.pattern.pipe
 
   implicit val ec = context.system.dispatcher
 
   val log = Logging(this)
   val flushSchedule = context.system.scheduler.schedule(config.flushDuration, config.flushDuration, self, Flush)
-  var queue = Queue.empty[(BulkAction, SingleDocumentApi, ActorRef)]
+  var queue = Queue.empty[(BulkAction, BulkActionable, ActorRef)]
 
   override def receive = {
-    case (a: BulkAction, api: SingleDocumentApi) ⇒ queue = queue.enqueue((a, api, sender())); flush()
-    case Flush                                   ⇒ flush(force = true)
-    case IndexingSuccessful(data)                ⇒
+    case (a: BulkAction, api: BulkActionable) ⇒ queue = queue.enqueue((a, api, sender())); flush()
+    case Flush                                ⇒ flush(force = true)
+    case IndexingSuccessful(data)             ⇒
       data foreach {
         case (_, _, response, replyTo) ⇒ replyTo ! DocumentIndexed(response)
       }
-    case IndexingFailure(error, data)            ⇒
+    case IndexingFailure(error, data)         ⇒
       data foreach {
         case (action, api, sender) ⇒ sender ! DocumentNotIndexed(error, action, api)
       }
-    case other                                   ⇒ log.warning(s"Uknown message: ${other.getClass} -> $other")
+    case other                                ⇒ log.warning(s"Uknown message: ${other.getClass} -> $other")
   }
 
   override def postStop() = {
@@ -58,11 +59,13 @@ class BulkIndexer[Json](client: ESClient[Json], config: BulkIndexerConfig) exten
       val bulkActions = queue.map { case (action, docApi, _) ⇒ action → docApi }
 
       val bulkSession = queue
-      queue = Queue.empty[(BulkAction, SingleDocumentApi, ActorRef)]
+      queue = Queue.empty[(BulkAction, BulkActionable, ActorRef)]
 
       log.info(f"Flushing ${queue.size} messages.")
 
-      client.bulk(bulkActions: _*) map { response ⇒
+      import dutchman.ops._
+
+      client.execute(bulk(bulkActions: _*)) map { response ⇒
         log.info(f"Flushed ${response.size} messages.")
         if (response.size == bulkSession.size) {
           IndexingSuccessful(response.zip(bulkSession) map {

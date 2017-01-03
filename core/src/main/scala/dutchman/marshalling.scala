@@ -1,12 +1,14 @@
 package dutchman
 
 import dutchman.api._
+import dutchman.dsl._
 
 object marshalling {
   case class DecodingError(message: String) extends Exception(s"Error decoding json: $message")
 
-  trait OperationWriter {
-    def write[A](api: Api[A]): String
+  trait ApiDataWriter {
+    def write(data: ApiData): String
+    def write(data: Seq[ApiData]): String
   }
 
   trait ResponseReader[Json] {
@@ -15,13 +17,13 @@ object marshalling {
     def readError(json: Json): Option[Seq[ESError]]
     def get(json: Json): GetResponse[Json]
     def index(json: Json): IndexResponse
-    def multiGet(json: Json): MultiGetResponse
+    def multiGet(json: Json): MultiGetResponse[Json]
     def delete(json: Json): DeleteResponse
     def deleteIndex(json: Json): DeleteIndexResponse
     def bulk(json: Json): Seq[BulkResponse]
     def search(json: Json): SearchResponse[Json]
     def refresh(json: Json): RefreshResponse
-    def scroll(json: Json): ScrollResponse[Json]
+    //    def scroll(json: Json): ScrollResponse[Json]
     def update(json: Json): UpdateResponse
   }
 }

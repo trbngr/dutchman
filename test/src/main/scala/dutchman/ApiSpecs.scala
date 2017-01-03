@@ -1,9 +1,10 @@
 package dutchman
 
-import dutchman.api._
 import dutchman.document._
+import dutchman.dsl._
 import dutchman.http.{Endpoint, HttpClient}
-import dutchman.model.Person
+import dutchman.model._
+import dutchman.ops._
 import dutchman.search._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -22,18 +23,13 @@ trait ApiSpecs[Json]
     with ScrollSpecs[Json]
     with BoolSpecs[Json] {
 
-  val tpe = Type("person")
-
   def readPerson(json: Json): Person
 
   val httpClient: HttpClient
-  implicit val operationWriter: marshalling.OperationWriter
+  implicit val dataWriter: marshalling.ApiDataWriter
   implicit val responseReader: marshalling.ResponseReader[Json]
 
   lazy implicit val client = httpClient.bind(Endpoint.localhost)
-
-  def deleteIndex(idx: Idx) = client.deleteIndex(idx).futureValue
-  def refresh(index: Idx) = client.refresh(Seq(index)).futureValue
 
   implicit val patience = PatienceConfig(timeout = scaled(Span(10, Seconds)), interval = scaled(Span(50, Millis)))
 
@@ -44,7 +40,7 @@ trait ApiSpecs[Json]
 
     "a document doesn't exist" should {
       "return false" in {
-        client.documentExists(idx, tpe, id) map { exists ⇒
+        client(documentExists(idx, tpe, id)) map { exists ⇒
           exists shouldBe false
         }
       }
@@ -53,13 +49,11 @@ trait ApiSpecs[Json]
     "a document does exist" should {
       "return true" in {
 
-        val ops = client.ops
-
         val api = for {
-          _ ← ops.index(idx, tpe, Document(id, Map("name" → "chris")), None)
-          _ ← ops.refresh(idx)
-          e ← ops.documentExists(idx, tpe, id)
-          _ ← ops.deleteIndex(idx)
+          _ ← index(idx, tpe, ElasticDocument(id, Map("name" → "chris")), None)
+          _ ← refresh(idx)
+          e ← documentExists(idx, tpe, id)
+          _ ← deleteIndex(idx)
         } yield e
 
         client(api) map { exists ⇒

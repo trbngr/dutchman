@@ -16,22 +16,25 @@ object http {
 
   object Endpoint {
     val localhost: Endpoint = localhost(9200)
-    def localhost(port: Int): Endpoint = Endpoint("localhost", port)
-    def aws(host: String): Endpoint = Endpoint(host, 443)
+    def localhost(port: Int): Endpoint = Endpoint("localhost", port, Http)
+    def aws(host: String): Endpoint = Endpoint(host, 443, Https)
   }
 
-  case class Endpoint(host: String, port: Int) {
-    def protocol = port match {
-      case 443 ⇒ "https"
-      case _   ⇒ "http"
-    }
+  sealed trait Protocol
+  case object Http extends Protocol{
+    override def toString = "http"
+  }
+  case object Https extends Protocol{
+    override def toString = "https"
   }
 
-  trait ESRequestSigner {
+  case class Endpoint(host: String, port: Int, protocol: Protocol = Https)
+
+  trait ElasticRequestSigner {
     def sign(endpoint: Endpoint, request: Request): Request
   }
 
-  object NullRequestSigner extends ESRequestSigner {
+  object NullRequestSigner extends ElasticRequestSigner {
     def sign(endpoint: Endpoint, request: Request) = request
   }
 

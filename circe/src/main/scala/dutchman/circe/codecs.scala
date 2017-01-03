@@ -1,7 +1,7 @@
 package dutchman.circe
 
 import cats.syntax.either._
-import dutchman.api._
+import dutchman.dsl._
 import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder, Json}
 
@@ -83,13 +83,13 @@ private[circe] object codecs {
     )
   }
 
-  implicit val scrollResponseEncoder = deriveEncoder[ScrollResponse[Json]]
-  implicit val scrollResponseDecoder = Decoder.decodeJson map { json ⇒
-    ScrollResponse(
-      scrollId = json \ "_scroll_id" string "",
-      results = json.as[SearchResponse[Json]].getOrElse(SearchResponse[Json](Shards(0, 0, 0), 0, Seq.empty))
-    )
-  }
+//  implicit val scrollResponseEncoder = deriveEncoder[ScrollResponse[Json]]
+//  implicit val scrollResponseDecoder = Decoder.decodeJson map { json ⇒
+//    ScrollResponse(
+//      scrollId = json \ "_scroll_id" string "",
+//      results = json.as[SearchResponse[Json]].getOrElse(SearchResponse[Json](Shards(0, 0, 0), 0, Seq.empty))
+//    )
+//  }
 
   implicit val getResponseEncoder = deriveEncoder[GetResponse[Json]]
   implicit val getResponseDecoder = Decoder.decodeJson map {json ⇒

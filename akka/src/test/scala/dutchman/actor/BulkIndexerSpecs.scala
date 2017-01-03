@@ -4,8 +4,9 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import dutchman.AkkaHttpClient
-import dutchman.api._
 import dutchman.circe._
+import dutchman.dsl._
+import dutchman.ops._
 import dutchman.http.Endpoint
 import dutchman.model._
 import io.circe.generic.semiauto.deriveDecoder
@@ -47,14 +48,14 @@ class BulkIndexerSpecs extends TestKit(ActorSystem("BulkIndexerSpecs"))
     val persons = generatePeople(1 to 18)
 
     persons foreach { p ⇒
-      indexer ! Bulk(Index(idx, tpe, p))
+      indexer ! BulkAction(Index(idx, tpe, p, None))
     }
 
     receiveN(18, 15 seconds) foreach println
   }
 
   override protected def afterAll(): Unit = {
-    client.deleteIndex(idx).futureValue
+    client(deleteIndex(idx)).futureValue
     TestKit.shutdownActorSystem(system)
   }
 }

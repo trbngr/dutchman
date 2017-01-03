@@ -1,23 +1,24 @@
 package dutchman.document
 
 import dutchman.ApiSpecs
-import dutchman.api._
+import dutchman.dsl._
 import dutchman.model._
+import dutchman.ops._
 
 trait IndexSpecs[Json] {
   this: ApiSpecs[Json] ⇒
 
   private[this] val idx: Idx = "index_specs"
+  private[this] val tpe: Type = "person"
 
   "Index" when {
     val person = Person("123", "Chris", "PHX")
 
     "it doesn't exist" should {
       "be created" in {
-        val ops = client.ops
         val api = for {
-          r ← ops.index(idx, tpe, person)
-          _ ← ops.deleteIndex(idx)
+          r ← index(idx, tpe, person, None)
+          _ ← deleteIndex(idx)
         } yield r
 
         val response = client(api).futureValue
@@ -28,11 +29,10 @@ trait IndexSpecs[Json] {
     "It already exists" should {
       "be not created" in {
 
-        val ops = client.ops
         val api = for {
-          _ ← ops.index(idx, tpe, person)
-          r ← ops.index(idx, tpe, person)
-          _ ← ops.deleteIndex(idx)
+          _ ← index(idx, tpe, person, None)
+          r ← index(idx, tpe, person, None)
+          _ ← deleteIndex(idx)
         } yield r
 
         val response = client(api).futureValue

@@ -1,6 +1,7 @@
 package dutchman.document
 
-import dutchman.api._
+import dutchman.dsl._
+import dutchman.ops._
 import dutchman.model._
 import dutchman._
 import org.scalatest.BeforeAndAfterAll
@@ -11,15 +12,16 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
   this: ApiSpecs[Json] ⇒
 
   private[this] val idx: Idx = "bulk_specs"
+  private[this] val tpe: Type = "person"
 
   "Bulk" when {
     "updating a non-existing document" should {
       "?" in {
         val action = BulkAction(Update(idx, tpe, Person("123", "Frank", "Philly")))
-        val ops = client.ops
+
         val api = for {
-          r ← ops.bulk(Seq(action): _*)
-          _ ← ops.deleteIndex(idx)
+          r ← bulk(Seq(action): _*)
+          _ ← deleteIndex(idx)
         } yield r
 
         val response = client(api).futureValue
@@ -30,17 +32,17 @@ trait BulkSpecs[Json] extends BeforeAndAfterAll {
     "index" should {
       "?" in {
         val actions = (1 to 10) map { _ ⇒
-          BulkAction(Index(idx, tpe, Person(
+          val document = Person(
             id = Random.alphanumeric.take(3).mkString,
             name = Random.alphanumeric.take(3).mkString,
             city = Random.alphanumeric.take(3).mkString
-          )))
+          )
+          BulkAction(Index(idx, tpe, document, None))
         }
 
-        val ops = client.ops
         val api = for {
-          r ← ops.bulk(actions: _*)
-          _ ← ops.deleteIndex(idx)
+          r ← bulk(actions: _*)
+          _ ← deleteIndex(idx)
         } yield r
 
         val response = client(api).futureValue

@@ -1,8 +1,9 @@
 package dutchman.search
 
-import dutchman.api._
+import dutchman.{ApiSpecs, ElasticOps}
+import dutchman.dsl._
+import dutchman.ops._
 import dutchman.model._
-import dutchman.{ApiSpecs, ESApi}
 
 import scala.util.Random
 
@@ -10,16 +11,17 @@ trait BoolSpecs[Json] {
   this: ApiSpecs[Json] ⇒
 
   private[this] val idx: Idx = "bool_specs"
+  private[this] val tpe: Type = "person"
 
   val boolSpecsIndexActions = (1 to 10) map { i ⇒
     val prefix = if (i % 2 == 0) "even" else "odd"
-    BulkAction(
-      Index(idx, tpe, Person(
-        id = Random.alphanumeric.take(3).mkString,
-        name = s"$prefix-${Random.alphanumeric.take(3).mkString}",
-        city = s"$prefix-${Random.alphanumeric.take(3).mkString}"
-      ))
+    val document = Person(
+      id = Random.alphanumeric.take(3).mkString,
+      name = s"$prefix-${Random.alphanumeric.take(3).mkString}",
+      city = s"$prefix-${Random.alphanumeric.take(3).mkString}"
     )
+
+    BulkAction(Index(idx, tpe, document, None))
   }
 
   "Bool Query" should {
@@ -30,12 +32,11 @@ trait BoolSpecs[Json] {
           Prefix("city", "ev")
         )
       )
-      val ops = client.ops
 
-      val api: ESApi[SearchResponse[Json]] = for {
-        _ ← ops.bulk(boolSpecsIndexActions: _*)
-        r ← ops.search(idx, tpe, query, None)
-        _ ← ops.deleteIndex(idx)
+      val api = for {
+        _ ← bulk(boolSpecsIndexActions: _*)
+        r ← search[Json](idx, tpe, query, None)
+        _ ← deleteIndex(idx)
       } yield r
 
       val response = client(api).futureValue
@@ -52,12 +53,10 @@ trait BoolSpecs[Json] {
         )
       )
 
-      val ops = client.ops
-
-      val api: ESApi[SearchResponse[Json]] = for {
-        _ ← ops.bulk(boolSpecsIndexActions: _*)
-        r ← ops.search(idx, tpe, query, None)
-        _ ← ops.deleteIndex(idx)
+      val api = for {
+        _ ← bulk(boolSpecsIndexActions: _*)
+        r ← search[Json](idx, tpe, query, None)
+        _ ← deleteIndex(idx)
       } yield r
 
       val response = client(api).futureValue

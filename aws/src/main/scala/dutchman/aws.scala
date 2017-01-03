@@ -25,12 +25,12 @@ object aws {
         encodedValue = URLEncoder.encode(value, "UTF8")
       } yield name + "=" + encodedValue
 
-      new URL(endpoint.protocol, endpoint.host, endpoint.port, s"${request.path}${query.mkString("?", "&", "")}")
+      new URL(endpoint.protocol.toString, endpoint.host, endpoint.port, s"${request.path}${query.mkString("?", "&", "")}")
     }
   }
 
   final class AWSSigner(credentials: AWSCredentialsProvider, region: String, service: String)
-    extends ESRequestSigner {
+    extends ElasticRequestSigner {
 
     import AWSSigner._
 

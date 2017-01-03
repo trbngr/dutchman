@@ -1,93 +1,96 @@
 package dutchman
 
-import scala.concurrent.duration._
+import dutchman.dsl._
+import dutchman.http._
 
-package object api extends search with query with syntax {
+package object api extends QueryApiSupport with SearchOptionsApiSupport {
 
-  sealed trait Api[+A]
-  sealed trait DocumentApi
-  sealed trait SingleDocumentApi extends DocumentApi
-  sealed trait IndicesApi
-  sealed trait SearchApi
+  val BulkActionsKey = "bulk_actions"
 
-  case class Shards(total: Int, failed: Int, successful: Int)
-  case class Response(shards: Shards, index: String, `type`: String, id: String, version: Int)
-  case class ESError(index: String, `type`: String, id: String, status: Int)
-  case class ESErrorsException(errors: Seq[ESError]) extends Exception(s"Elasticsearch exception: ${errors.map(e ⇒ e.status).mkString("\n")}")
+  type ApiData = Map[String, Any]
 
-  final case class Id(value: String)
-
-  object Idx {
-    def apply(name: String): Idx = new Idx(name.toLowerCase())
-  }
-  final class Idx(val name: String)
-
-  final case class Type(name: String)
-
-  trait ESDocument[A] {
-    def document(a: A): Document
+  object ApiData {
+    def empty = Map.empty[String, Any]
   }
 
-  implicit val defaultDocument = new ESDocument[Document] {
-    def document(a: Document) = a
+  case class ApiRepresentation(request: Request, data: ApiData = ApiData.empty)
+
+  def generateApi[A](op: ElasticOp[A]): ApiRepresentation = op match {
+    case Bulk(actions) ⇒ ApiRepresentation(
+      request = Request(POST, "/_bulk"),
+      data = Map(BulkActionsKey → actions.flatMap {
+        case (action, bulkApi) ⇒
+          val name = action match {
+            case BulkCreate ⇒ "create"
+            case BulkUpdate ⇒ "update"
+            case BulkIndex  ⇒ "index"
+            case BulkDelete ⇒ "delete"
+          }
+
+          bulkApi match {
+            case x: Get[_] ⇒ Seq(Map(name → Map("_index" → x.index.name, "_type" → x.`type`.name, "_id" → x.id.value)), x.data)
+            case x: Delete ⇒ Seq(Map(name → Map("_index" → x.index.name, "_type" → x.`type`.name, "_id" → x.id.value)), x.data)
+            case x: Update ⇒ Seq(Map(name → Map("_index" → x.index.name, "_type" → x.`type`.name, "_id" → x.document.id.value)), Map("doc" → x.data))
+            case x: Index  ⇒ Seq(Map(name → Map("_index" → x.index.name, "_type" → x.`type`.name, "_id" → x.document.id.value)), x.data)
+          }
+      })
+    )
+
+    case DocumentExists(index, tpe, id) ⇒ ApiRepresentation(
+      request = Request(HEAD, s"/${index.name}/${tpe.name}/${id.value}"),
+      data = ApiData.empty
+    )
+
+    case Delete(index, tpe, id, version) ⇒ ApiRepresentation(
+      request = Request(DELETE, s"/${index.name}/${tpe.name}/${id.value}", Map() ++ version.map(v ⇒ "version" → v.toString))
+    )
+
+    case Get(index, tpe, id) ⇒ ApiRepresentation(
+      request = Request(GET, s"/${index.name}/${tpe.name}/${id.value}")
+    )
+
+    case Index(index, tpe, document, version) ⇒ ApiRepresentation(
+      request = Request(PUT, s"/${index.name}/${tpe.name}/${document.id.value}", Map() ++ version.map(v ⇒ "version" → v.toString)),
+      data = document.data
+    )
+
+    case MultiGet(ids) ⇒ ApiRepresentation(
+      request = Request(GET, "/_mget"),
+      data = Map("docs" → ids.map {
+        case (index, Some(tpe), Some(id)) ⇒ Map("_index" → index.name, "_type" → tpe.name, "_id" → id.value)
+        case (index, Some(tpe), None)     ⇒ Map("_index" → index.name, "_type" → tpe.name)
+        case (index, _, _)                ⇒ Map("_index" → index.name)
+      })
+    )
+
+    case Update(index, tpe, document) ⇒ ApiRepresentation(
+      request = Request(PUT, s"/${index.name}/${tpe.name}/${document.id.value}"),
+      data = document.data
+    )
+
+    case DeleteIndex(index) ⇒ ApiRepresentation(Request(DELETE, s"/${index.name}"))
+    case Refresh(idx)       ⇒ ApiRepresentation(Request(POST, idx match {
+      case indices if indices.isEmpty ⇒ "/_refresh"
+      case indices                    ⇒ s"/${indices.map(_.name).mkString(",")}/_refresh"
+    }))
+
+    case Search(indices, types, query, options) ⇒
+      val path = (indices, types) match {
+        case (i, t) if i.isEmpty && t.isEmpty ⇒ "/_search"
+        case (i, t) if t.isEmpty              ⇒ s"/${i.map(_.name).mkString(",")}/_search"
+        case (i, t)                           ⇒ s"/${i.map(_.name).mkString(",")}/${t.map(_.name).mkString(",")}/_search"
+      }
+      val params = if (indices.size > 1) Map("ignore_unavailable" → "true") else Map.empty[String, String]
+      val request = Request(POST, path, params)
+
+      ApiRepresentation(
+        request = request,
+        data = Map("query" → query.data) ++ options.data
+      )
   }
 
-  //document api
-  case class Document(id: Id, data: Map[String, Any])
-
-  case class DocumentExists(index: Idx, `type`: Type, id: Id) extends Api[Boolean] with DocumentApi
-
-  object Index {
-    def apply[A: ESDocument](index: Idx, `type`: Type, document: A, version: Option[Int] = None): Index = new Index(index, `type`, implicitly[ESDocument[A]].document(document), version)
+  implicit class ApiGenerator[A](op: ElasticOp[A]) {
+    def api: ApiRepresentation = generateApi(op)
+    def data: ApiData = api.data
   }
-  case class Index(index: Idx, `type`: Type, document: Document, version: Option[Int]) extends Api[IndexResponse] with SingleDocumentApi
-
-  object Update {
-    def apply[A: ESDocument](index: Idx, `type`: Type, document: A): Update = new Update(index, `type`, implicitly[ESDocument[A]].document(document))
-  }
-  case class Update(index: Idx, `type`: Type, document: Document) extends Api[UpdateResponse] with SingleDocumentApi
-
-  case class Get[Json](index: Idx, `type`: Type, id: Id) extends Api[GetResponse[Json]] with SingleDocumentApi
-  case class Delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) extends Api[DeleteResponse] with SingleDocumentApi
-  case class MultiGet(ids: (Idx, Option[Type], Option[Id])*) extends Api[MultiGetResponse] with DocumentApi
-
-  sealed trait BulkAction
-  case object BulkIndex extends BulkAction
-  case object BulkCreate extends BulkAction
-  case object BulkDelete extends BulkAction
-  case object BulkUpdate extends BulkAction
-
-  object BulkAction {
-    def apply(c: Index, create: Boolean = false): (BulkAction, SingleDocumentApi) = (if (create) BulkCreate else BulkIndex) → c
-    def apply(c: Update): (BulkAction, SingleDocumentApi) = BulkUpdate → c
-    def apply(c: Delete): (BulkAction, SingleDocumentApi) = BulkDelete → c
-  }
-
-  case class Bulk(actions: (BulkAction, SingleDocumentApi)*) extends Api[Seq[BulkResponse]] with DocumentApi
-  case class BulkResponse(action: BulkAction, status: Int, response: Response)
-
-  case class IndexResponse(created: Boolean, response: Response)
-  case class DeleteResponse()
-  case class UpdateResponse()
-  case class MultiGetResponse()
-  case class GetResponse[Json](index: String, `type`: String, id: String, version: Int, found: Boolean, source: Json)
-
-  //indices api
-  case class DeleteIndex(index: Idx) extends Api[DeleteIndexResponse] with IndicesApi
-  case class DeleteIndexResponse(acknowledged: Boolean)
-  case class Refresh(indices: Seq[Idx]) extends Api[RefreshResponse] with IndicesApi
-  case class RefreshResponse(shards: Shards)
-
-  //search api
-  case class Search[Json](indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]) extends Api[SearchResponse[Json]] with SearchApi
-
-  case class JsonDocument[Json](index: Idx, `type`: Type, id: Id, score: Float, source: Json)
-  case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]])
-
-  case class StartScroll[Json](index: Idx, `type`: Type, query: Query, ttl: FiniteDuration = 1 minute, options: Option[SearchOptions]) extends Api[ScrollResponse[Json]] with SearchApi
-  case class Scroll[Json](scrollId: String, ttl: FiniteDuration = 1 minute) extends Api[ScrollResponse[Json]] with SearchApi
-
-  case class ClearScroll(scrollIds: Set[String]) extends Api[Unit] with SearchApi
-  case class ScrollResponse[Json](scrollId: String, results: SearchResponse[Json])
-
 }
