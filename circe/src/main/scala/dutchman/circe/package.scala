@@ -63,7 +63,7 @@ package object circe {
     }
     def deleteIndex(json: Json) = json.as[DeleteIndexResponse].getOrElse(e("deleteIndex"))
     def readError(json: Json) = {
-      val errors = json \ "errors" bool false
+//      val errors = json \ "errors" bool false
       None
     }
     def bulk(json: Json) = json \ "items" bulkResponses

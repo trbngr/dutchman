@@ -8,7 +8,20 @@ lazy val buildSettings = Seq(
   description := "Dutchman",
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
-  scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds"),
+  scalacOptions := Seq(
+    "-encoding", "UTF-8",
+    "-unchecked",
+    "-deprecation",
+    "-feature",
+    "-Ywarn-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-unused",
+    "-Xlint:-infer-any",
+    "-Xfatal-warnings",
+    "-language:postfixOps",
+    "-language:implicitConversions",
+    "-language:higherKinds"
+  ),
   testOptions in Test += Tests.Argument("-oD"),
 
   //Let CTRL+C kill the current task and not the whole SBT session.
