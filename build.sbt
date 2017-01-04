@@ -2,11 +2,11 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "1.0.6",
+  version := "1.0.9",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.8", "2.12.1"),
   scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-Xlint:-infer-any", "-Xfatal-warnings", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds"),
   testOptions in Test += Tests.Argument("-oD"),
@@ -50,7 +50,6 @@ lazy val test = project.in(file("test"))
   .settings(
     moduleName := "dutchman-test",
     libraryDependencies ++= Seq(scalaTest),
-    libraryDependencies ++= Seq(elasticsearch),
     publish := {}
   )
   .dependsOn(core)
@@ -59,7 +58,7 @@ lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "dutchman-akka",
-    libraryDependencies ++= Seq(akkaHttp, akkaStream, akkaTestKit)
+    libraryDependencies += akkaHttp
   )
   .dependsOn(core, test % Test, circe % Test)
   .settings(publishSettings: _*)

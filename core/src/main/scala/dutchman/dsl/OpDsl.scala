@@ -20,7 +20,7 @@ trait OpDsl {
 
   case class DocumentExists(index: Idx, `type`: Type, id: Id) extends ElasticOp[Boolean]
 
-  case class Get[Json](index: Idx, `type`: Type, id: Id) extends ElasticOp[GetResponse[Json]] with BulkActionable
+  case class Get[Json](index: Idx, `type`: Type, id: Id) extends ElasticOp[GetResponse[Json]]
   case class GetResponse[Json](index: String, `type`: String, id: String, version: Int, found: Boolean, source: Json)
 
   case class Delete(index: Idx, `type`: Type, id: Id, version: Option[Int]) extends ElasticOp[DeleteResponse] with BulkActionable
