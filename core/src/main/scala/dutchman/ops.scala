@@ -10,8 +10,8 @@ object ops {
     liftF(op)
   }
 
-  def get[D: ESDocument](index: Idx, `type`: Type, id: Id): ElasticOps[GetResponse[D]] = {
-    val g: ElasticOp[GetResponse[D]] = Get[D](index, `type`, id)
+  def get[Json](index: Idx, `type`: Type, id: Id): ElasticOps[GetResponse[Json]] = {
+    val g: ElasticOp[GetResponse[Json]] = Get[Json](index, `type`, id)
     liftF(g)
   }
 
