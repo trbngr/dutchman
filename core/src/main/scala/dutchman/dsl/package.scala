@@ -18,7 +18,9 @@ package object dsl extends OpDsl with QueryDsl with SearchOptionsDsl with Syntax
   object Idx {
     def apply(name: String): Idx = new Idx(name.toLowerCase())
   }
-  final class Idx(val name: String)
+  final class Idx(val name: String) {
+    override def toString = name
+  }
 
   final case class Type(name: String)
 

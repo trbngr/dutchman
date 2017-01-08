@@ -5,6 +5,7 @@ import dutchman.api._
 import dutchman.dsl._
 import dutchman.http._
 import dutchman.marshalling.{ApiDataWriter, ResponseReader}
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -12,10 +13,15 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
                        (implicit ec: ExecutionContext, writer: ApiDataWriter, reader: ResponseReader[Json])
   extends (ElasticOp ~> Future) {
 
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   private def execute[A](api: ApiRepresentation, fx: Json ⇒ A): Future[A] = {
+
     val payload = api.data.get(BulkActionsKey) collect {
       case c: Seq[_] ⇒ writer.write(c.asInstanceOf[Seq[ApiData]])
     } getOrElse writer.write(api.data)
+
+    logger.debug(s"request: ${api.request.verb} ${api.request.path}: ${reader.read(payload)}")
 
     val request = signer.sign(endpoint, api.request).copy(
       payload = payload
@@ -23,6 +29,7 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
 
     client.execute(endpoint)(request) map { response ⇒
       val json = reader.read(response)
+      logger.debug(s"response: $json")
       reader.readError(json) match {
         case Some(errors) ⇒ throw ElasticErrorsException(errors)
         case _            ⇒ fx(json)

@@ -6,11 +6,8 @@ import dutchman.dsl._
 import dutchman.marshalling._
 import io.circe._
 import io.circe.parser._
-import org.slf4j.LoggerFactory
 
 package object circe {
-
-  private val log = LoggerFactory.getLogger(getClass)
 
   implicit object CirceOperationWriter extends ApiDataWriter {
     override def write(data: ApiData) = if(data.isEmpty) "" else data.toJson
@@ -18,11 +15,7 @@ package object circe {
   }
 
   implicit class RichApiData(data: ApiData) {
-    def toJson = {
-      val json = createJson(data)
-      log.debug(s"payload: $json")
-      json.noSpaces
-    }
+    def toJson = createJson(data).noSpaces
 
     private def createJson(value: Any): Json = value match {
       case v: String      ⇒ Json.fromString(v)
@@ -46,11 +39,8 @@ package object circe {
 
     private def e(op: String) = throw DecodingError(s"Invalid response: $op")
 
-    def read(json: String) = {
-      val response = parse(json).getOrElse(Json.Null)
-      log.debug(s"response: $response")
-      response
-    }
+    def read(json: String) = parse(json).getOrElse(Json.Null)
+
     def error(json: String) = {
       println(s"error: $json")
       read(json).as[ESError].getOrElse(e("error"))

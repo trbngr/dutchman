@@ -53,6 +53,6 @@ trait OpDsl {
   case class JsonDocument[Json](index: Idx, `type`: Type, id: Id, score: Float, source: Json)
   case class SearchResponse[Json](shards: Shards, total: Int, documents: Seq[JsonDocument[Json]])
 
-  case class Search[Json](indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]) extends ElasticOp[SearchResponse[Json]]
+  case class Search[Json](indices: Set[Idx], types: Set[Type], query: Query, options: Option[SearchOptions]) extends ElasticOp[SearchResponse[Json]]
 
 }

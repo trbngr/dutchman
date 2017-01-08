@@ -1,5 +1,7 @@
 package dutchman
 
+import cats.free.Free
+
 object ops {
 
   import cats.free.Free.liftF
@@ -25,11 +27,11 @@ object ops {
   def index(index: Idx, `type`: Type, document: ElasticDocument, version: Option[Int]): ElasticOps[IndexResponse] =
     liftF(Index(index, `type`, document, version))
 
-  def update[D: ESDocument](index: Idx, `type`: Type, document: D) = {
+  def update[D: ESDocument](index: Idx, `type`: Type, document: D): Free[ElasticOp, UpdateResponse] = {
     val doc = implicitly[ESDocument[D]].document(document)
     liftF(Update(index, `type`, doc))
   }
-  def update(index: Idx, `type`: Type, document: ElasticDocument) =
+  def update(index: Idx, `type`: Type, document: ElasticDocument): Free[ElasticOp, UpdateResponse] =
     liftF(Update(index, `type`, document))
 
   def documentExists(index: Idx, `type`: Type, id: Id): ElasticOps[Boolean] =
@@ -40,15 +42,15 @@ object ops {
   def refresh(indices: Idx*): ElasticOps[RefreshResponse] = liftF(Refresh(indices))
 
   def search[Json](index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] =
-    search[Json](Seq(index), Seq(`type`), query, options)
+    search[Json](Set(index), Set(`type`), query, options)
 
-  def search[Json](index: Idx, types: Seq[Type], query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] =
-    search[Json](Seq(index), types, query, options)
+  def search[Json](index: Idx, types: Set[Type], query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] =
+    search[Json](Set(index), types, query, options)
 
-  def search[Json](indices: Seq[Idx], `type`: Type, query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] =
-    search[Json](indices, Seq(`type`), query, options)
+  def search[Json](indices: Set[Idx], `type`: Type, query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] =
+    search[Json](indices, Set(`type`), query, options)
 
-  def search[Json](indices: Seq[Idx], types: Seq[Type], query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] = {
+  def search[Json](indices: Set[Idx], types: Set[Type], query: Query, options: Option[SearchOptions]): ElasticOps[SearchResponse[Json]] = {
     val api: ElasticOp[SearchResponse[Json]] = Search[Json](indices, types, query, options)
     liftF(api)
   }
