@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "1.0.19",
+  version := "0.1.21",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",
@@ -65,13 +65,13 @@ lazy val test = project.in(file("test"))
     libraryDependencies ++= Seq(scalaTest),
     publish := {}
   )
-  .dependsOn(core)
+  .dependsOn(core % "compile,test")
 
 lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
     moduleName := "dutchman-akka",
-    libraryDependencies += akkaHttp
+    libraryDependencies ++= Seq(akkaHttp, akkaTestKit)
   )
   .dependsOn(core, test % Test, circe % Test)
   .settings(publishSettings: _*)

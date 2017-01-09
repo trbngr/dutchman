@@ -21,6 +21,7 @@ trait ApiSpecs[Json]
     with BulkSpecs[Json]
     with SearchSpecs[Json]
     with ScrollSpecs[Json]
+    with GetSpecs[Json]
     with BoolSpecs[Json] {
 
   def readPerson(json: Json): Person

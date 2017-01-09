@@ -99,7 +99,7 @@ private[circe] object codecs {
       id = json \ "_id" string "",
       version = json \ "_version" int 0,
       found = json \ "found" bool false,
-      source = json \ "_source" json
+      source = json \ "_source" json(Json.Null)
     )
   }
 }

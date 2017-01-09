@@ -21,7 +21,7 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
       case c: Seq[_] ⇒ writer.write(c.asInstanceOf[Seq[ApiData]])
     } getOrElse writer.write(api.data)
 
-    logger.debug(s"request: ${api.request.verb} ${api.request.path}: ${reader.read(payload)}")
+    logger.debug(s"request: ${api.request.verb} ${api.request.path}: $payload")
 
     val request = signer.sign(endpoint, api.request).copy(
       payload = payload
