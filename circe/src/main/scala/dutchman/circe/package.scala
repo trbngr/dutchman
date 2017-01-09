@@ -10,7 +10,7 @@ import io.circe.parser._
 package object circe {
 
   implicit object CirceOperationWriter extends ApiDataWriter {
-    override def write(data: ApiData) = if(data.isEmpty) "" else data.toJson
+    override def write(data: ApiData) = if (data.isEmpty) "" else data.toJson
     override def write(data: Seq[ApiData]) = data map (_.toJson) mkString("", "\n", "\n")
   }
 
@@ -28,6 +28,7 @@ package object circe {
       case v: BigDecimal  ⇒ Json.fromBigDecimal(v)
       case v: Map[_, _]   ⇒ Json.obj(v.asInstanceOf[ApiData].map(x ⇒ x._1 → createJson(x._2)).toSeq: _*)
       case v: Iterable[_] ⇒ Json.arr(v.map(createJson).toSeq: _*)
+      case null           ⇒ Json.Null
       case v              ⇒ throw new IllegalArgumentException(s"Unsupported scalar value: $v [${v.getClass}]")
     }
   }
@@ -53,7 +54,7 @@ package object circe {
     }
     def deleteIndex(json: Json) = json.as[DeleteIndexResponse].getOrElse(e("deleteIndex"))
     def readError(json: Json) = {
-//      val errors = json \ "errors" bool false
+      //      val errors = json \ "errors" bool false
       None
     }
     def bulk(json: Json) = json \ "items" bulkResponses
