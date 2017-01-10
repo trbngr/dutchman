@@ -13,7 +13,7 @@ trait SearchSpecs[Json] {
   private[this] val idx: Idx = "search_specs"
   private[this] val tpe: Type = "person"
 
-  val searchSpecsIndexActions = (1 to 10) map { i ⇒
+  private val searchSpecsIndexActions = (1 to 10) map { i ⇒
     val document = Person(
       id = Random.alphanumeric.take(3).mkString,
       name = s"${if (i % 2 == 0) "even" else "odd"}-${Random.alphanumeric.take(3).mkString}",

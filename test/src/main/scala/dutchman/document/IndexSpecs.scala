@@ -1,9 +1,10 @@
 package dutchman.document
 
-import dutchman.ApiSpecs
+import cats.data.EitherT
+import dutchman.{ApiSpecs, ElasticOps}
 import dutchman.dsl._
 import dutchman.model._
-import dutchman.ops._
+import dutchman.ops.{deleteIndex, _}
 
 trait IndexSpecs[Json] {
   this: ApiSpecs[Json] ⇒
@@ -16,12 +17,12 @@ trait IndexSpecs[Json] {
 
     "it doesn't exist" should {
       "be created" in {
-        val api = for {
+        val api: EitherT[ElasticOps, ESError, _root_.dutchman.dsl.IndexResponse] = for {
           r ← index(idx, tpe, person, None)
           _ ← deleteIndex(idx)
         } yield r
 
-        val response = client(api).futureValue
+        val response = client(api.value).futureValue
         response match {
           case Left(e) ⇒ fail(e.reason)
           case Right(r) ⇒ r.created shouldBe true
@@ -38,7 +39,7 @@ trait IndexSpecs[Json] {
           _ ← deleteIndex(idx)
         } yield r
 
-        val response = client(api).futureValue
+        val response = client(api.value).futureValue
         response match {
           case Left(e) ⇒ fail(e.reason)
           case Right(r) ⇒ r.created shouldBe false

@@ -16,7 +16,7 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  private def execute[A](api: ApiRepresentation, fx: Json ⇒ A): Future[ElasticResponse[A]] = {
+  private def execute[A](api: ApiRepresentation, fx: Json ⇒ A): Future[Either[ESError, A]] = {
 
     val payload = api.data.get(BulkActionsKey) collect {
       case c: Seq[_] ⇒ writer.write(c.asInstanceOf[Seq[ApiData]])

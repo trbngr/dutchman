@@ -1,5 +1,6 @@
 package dutchman
 
+import cats.data.EitherT
 import dutchman.document._
 import dutchman.dsl._
 import dutchman.http.{Endpoint, HttpClient}
@@ -17,11 +18,11 @@ trait ApiSpecs[Json]
     with Matchers
     with ScalaFutures
     with BeforeAndAfterEach
-//    with IndexSpecs[Json]
+    with IndexSpecs[Json]
 //    with BulkSpecs[Json]
 //    with SearchSpecs[Json]
 //    with ScrollSpecs[Json]
-    with GetSpecs[Json]
+//    with GetSpecs[Json]
 //    with BoolSpecs[Json]
 {
 
@@ -54,7 +55,7 @@ trait ApiSpecs[Json]
         val api = for {
           _ ← index(idx, tpe, ElasticDocument(id, Map("name" → "chris")), None)
           _ ← refresh(idx)
-          e ← documentExists(idx, tpe, id)
+          e ← documentExists(idx, tpe, id).right
           _ ← deleteIndex(idx)
         } yield e
 

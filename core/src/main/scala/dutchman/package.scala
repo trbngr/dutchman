@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 package object dutchman {
   type ElasticOps[A] = Free[ElasticOp, A]
-  type ElasticResponse[A] = Either[ESError, A]
+  type ElasticResponse[A] = EitherT[ElasticOps, ESError, A]
 
   implicit class RichClient[Json](client: HttpClient)(implicit ec: ExecutionContext, writer: ApiDataWriter, reader: ResponseReader[Json]) {
     def bind(endpoint: Endpoint, signer: ElasticRequestSigner = NullRequestSigner) = new ElasticClient[Json](client, endpoint, signer)
@@ -26,5 +26,8 @@ package object dutchman {
 
     def apply[A](ops: ElasticOps[A]): Future[A] = execute(ops)
     def execute[A](ops: ElasticOps[A]): Future[A] = ops.foldMap(interpreter)
+
+    def apply[A](ops: EitherT[ElasticOps, ESError, A]): Future[Either[ESError, A]] = execute(ops.value)
+    def execute[A](ops: EitherT[ElasticOps, ESError, A]): Future[Either[ESError, A]] = ops.value.foldMap(interpreter)
   }
 }
