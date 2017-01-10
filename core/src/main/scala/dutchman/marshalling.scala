@@ -13,8 +13,7 @@ object marshalling {
 
   trait ResponseReader[Json] {
     def read(json: String): Json
-    def error(json: String): ESError
-    def readError(json: Json): Option[Seq[ESError]]
+    def readError(json: Json): Option[ESError]
     def get(json: Json): GetResponse[Json]
     def index(json: Json): IndexResponse
     def multiGet(json: Json): MultiGetResponse[Json]

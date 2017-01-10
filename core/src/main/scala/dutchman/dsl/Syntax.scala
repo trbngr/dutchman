@@ -2,6 +2,7 @@ package dutchman.dsl
 
 trait Syntax {
 
+  implicit def intToId(s: Int): Id = Id(s.toString)
   implicit def stringToId(s: String): Id = Id(s)
   implicit def stringToIdx(s: String): Idx = Idx(s)
   implicit def stringToType(s: String): Type = Type(s)

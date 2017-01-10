@@ -1,7 +1,7 @@
 
 import cats.data.EitherT
 import cats.free.Free
-import cats.instances.future._
+import cats.implicits._
 import dutchman.dsl._
 import dutchman.http._
 import dutchman.marshalling._
@@ -25,8 +25,5 @@ package object dutchman {
 
     def apply[A](ops: ElasticOps[A]): Future[A] = execute(ops)
     def execute[A](ops: ElasticOps[A]): Future[A] = ops.foldMap(interpreter)
-
-    def apply[E,A](either: EitherT[ElasticOps, E, A]): Future[Either[E, A]] = execute(either.value)
-    def execute[E,A](either: EitherT[ElasticOps, E, A]): Future[Either[E, A]] = execute(either.value)
   }
 }

@@ -31,7 +31,7 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
       val json = reader.read(response)
       logger.debug(s"response: $json")
       reader.readError(json) match {
-        case Some(errors) ⇒ throw ElasticErrorsException(errors)
+        case Some(error) ⇒ throw error
         case _            ⇒ fx(json)
       }
     } recover {
@@ -39,7 +39,7 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
     }
   }
 
-  def apply[A](op: ElasticOp[A]) = {
+  def apply[A](op: ElasticOp[A]): Future[A] = {
     val api = op.api
     (op match {
       case _: DocumentExists ⇒ client.documentExists(endpoint)(api.request)

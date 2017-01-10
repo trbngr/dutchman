@@ -13,7 +13,17 @@ private[circe] object codecs {
   implicit val idEncoder = deriveEncoder[Id]
   implicit val typeEncoder = deriveEncoder[Type]
   implicit val errorEncoder = deriveEncoder[ESError]
-  implicit val errorDecoder = deriveDecoder[ESError]
+  implicit val errorDecoder = Decoder.decodeJson map {json ⇒
+    val error = json \ "error"
+    ESError(
+      `type` = error \ "type" string "",
+      reason = error \ "reason" string "",
+      resourceType = error \ "resource.type" string "",
+      resourceId = Id(error \ "resource.id" string ""),
+      index = Idx(error \ "index" string ""),
+      status = json \ "status" int 0
+    )
+  }
 
   implicit val shardsEncoder = deriveEncoder[Shards]
   implicit val shardsDecoder = deriveDecoder[Shards]

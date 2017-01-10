@@ -13,8 +13,7 @@ trait testMarshalling {
   }
 
   implicit object reader extends ResponseReader[String]{
-    override def read(json: String) = json
-    override def error(json: String) = ESError("" , "", "", 500)
+    override def read(json: String): String = json
     override def index(json: String) = ???
     override def deleteIndex(json: String) = ???
     override def readError(json: String) = None

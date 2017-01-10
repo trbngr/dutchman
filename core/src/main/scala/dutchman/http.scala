@@ -35,7 +35,7 @@ object http {
   }
 
   object NullRequestSigner extends ElasticRequestSigner {
-    def sign(endpoint: Endpoint, request: Request) = request
+    def sign(endpoint: Endpoint, request: Request): Request = request
   }
 
   trait HttpClient {
