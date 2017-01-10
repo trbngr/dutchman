@@ -22,7 +22,10 @@ trait IndexSpecs[Json] {
         } yield r
 
         val response = client(api).futureValue
-        response.created shouldBe true
+        response match {
+          case Left(e) ⇒ fail(e.reason)
+          case Right(r) ⇒ r.created shouldBe true
+        }
       }
     }
 
@@ -36,7 +39,10 @@ trait IndexSpecs[Json] {
         } yield r
 
         val response = client(api).futureValue
-        response.created shouldBe false
+        response match {
+          case Left(e) ⇒ fail(e.reason)
+          case Right(r) ⇒ r.created shouldBe false
+        }
       }
     }
   }

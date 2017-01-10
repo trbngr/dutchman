@@ -41,7 +41,10 @@ trait BoolSpecs[Json] {
 
       val response = client(api).futureValue
       println(s"RESPONSE: $response")
-      response.documents foreach println
+      response match {
+        case Right(v) ⇒ v.documents foreach println
+        case Left(e) ⇒ fail(e.reason)
+      }
     }
 
     "Be marshalled with multiple should clauses" in {
@@ -61,7 +64,10 @@ trait BoolSpecs[Json] {
 
       val response = client(api).futureValue
       println(s"RESPONSE: $response")
-      response.documents foreach println
+      response match {
+        case Right(v) ⇒ v.documents foreach println
+        case Left(e) ⇒ fail(e.reason)
+      }
 
     }
   }

@@ -42,6 +42,4 @@ object http {
     def execute(endpoint: Endpoint)(request: Request): Future[String]
     def documentExists(endpoint: Endpoint)(request: Request): Future[Boolean]
   }
-
-  case class HttpError(message: String) extends Exception(message)
 }

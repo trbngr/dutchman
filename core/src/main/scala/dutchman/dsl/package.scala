@@ -10,7 +10,7 @@ package object dsl extends OpDsl with QueryDsl with SearchOptionsDsl with Syntax
 
   case class Shards(total: Int, failed: Int, successful: Int)
   case class Response(shards: Shards, index: String, `type`: String, id: String, version: Int)
-  case class ESError(`type`: String, reason: String, resourceType: String, resourceId: Id, index: Idx, status: Int) extends Exception(s"Elasticsearch Exception: $reason")
+  case class ESError(`type`: String, reason: String, resourceType: String, resourceId: Id, index: Idx, status: Int)
 
   final case class Id(value: String)
 

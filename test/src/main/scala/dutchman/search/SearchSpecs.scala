@@ -36,10 +36,14 @@ trait SearchSpecs[Json] {
         } yield r
 
         val response = client(api).futureValue
-        response.total shouldBe 5
+        response match {
+          case Right(r) ⇒
+            r.total shouldBe 5
+            val persons = r.documents.map(x ⇒ readPerson(x.source))
+            persons.size shouldBe 5
+          case Left(e) ⇒ fail(e.reason)
+        }
 
-        val persons = response.documents.map(x ⇒ readPerson(x.source))
-        persons.size shouldBe 5
 
       }
     }

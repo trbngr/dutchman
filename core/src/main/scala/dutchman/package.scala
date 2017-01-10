@@ -11,6 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 package object dutchman {
   type ElasticOps[A] = Free[ElasticOp, A]
+  type ElasticResponse[A] = Either[ESError, A]
 
   implicit class RichClient[Json](client: HttpClient)(implicit ec: ExecutionContext, writer: ApiDataWriter, reader: ResponseReader[Json]) {
     def bind(endpoint: Endpoint, signer: ElasticRequestSigner = NullRequestSigner) = new ElasticClient[Json](client, endpoint, signer)
