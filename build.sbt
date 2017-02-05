@@ -24,6 +24,9 @@ lazy val buildSettings = Seq(
   ),
   testOptions in Test += Tests.Argument("-oD"),
 
+  EclipseKeys.skipParents in ThisBuild := true,
+
+
   //Let CTRL+C kill the current task and not the whole SBT session.
   cancelable in Global := true
 )
@@ -43,6 +46,7 @@ lazy val publishSettings = Seq(
 lazy val dutchman = project.in(file("."))
   .settings(buildSettings: _*)
   .settings(
+    name := "dutchman-client",
     moduleName := "dutchman-client",
     publishArtifact := false,
     publish := {}
@@ -53,6 +57,7 @@ lazy val core = project.in(file("core"))
   .settings(buildSettings: _*)
   .settings(publishSettings: _*)
   .settings(
+    name := "dutchman-core",  
     moduleName := "dutchman-core",
     libraryDependencies ++= Seq(cats, slf4j),
     libraryDependencies ++= Seq(scalaTest % Test)
@@ -61,6 +66,7 @@ lazy val core = project.in(file("core"))
 lazy val test = project.in(file("test"))
   .settings(buildSettings: _*)
   .settings(
+    name := "dutchman-test",  
     moduleName := "dutchman-test",
     libraryDependencies ++= Seq(scalaTest),
     publish := {}
@@ -70,6 +76,7 @@ lazy val test = project.in(file("test"))
 lazy val akka = project.in(file("akka"))
   .settings(buildSettings: _*)
   .settings(
+    name := "dutchman-akka",  
     moduleName := "dutchman-akka",
     libraryDependencies ++= Seq(akkaHttp, akkaTestKit)
   )
@@ -79,6 +86,7 @@ lazy val akka = project.in(file("akka"))
 lazy val aws = project.in(file("aws"))
   .settings(buildSettings: _*)
   .settings(
+    name := "dutchman-aws",    
     moduleName := "dutchman-aws",
     libraryDependencies ++= Seq(awsSdkCore),
     libraryDependencies ++= Seq(scalaTest % Test)
@@ -89,6 +97,7 @@ lazy val aws = project.in(file("aws"))
 lazy val circe = project.in(file("circe"))
   .settings(buildSettings: _*)
   .settings(
+    name := "dutchman-circe",      
     moduleName := "dutchman-circe",
     libraryDependencies ++= Dependencies.circe,
     libraryDependencies ++= Seq(slf4j, scalaTest % Test)
