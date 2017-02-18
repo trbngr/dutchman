@@ -3,13 +3,13 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val akka = "2.4.16"
-    val akkaHttp = "10.0.1"
+    val akka = "2.4.17"
+    val akkaHttp = "10.0.3"
     val scalaTest = "3.0.1"
-    val circe = "0.6.1"
+    val circe = "0.7.0"
     val awsSdkCore = "1.11.66"
     val slf4j = "1.7.16"
-    val cats = "0.8.1"
+    val cats = "0.9.0"
   }
 
   val slf4j = "org.slf4j" % "slf4j-api" % Version.slf4j

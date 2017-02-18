@@ -51,7 +51,7 @@ package object circe {
     def deleteIndex(json: Json): DeleteIndexResponse = json.as[DeleteIndexResponse].getOrElse(e("deleteIndex"))
 
     def readError(json: Json): Option[ESError] = {
-      json.cursor.downField("error") match {
+      json.hcursor.downField("error").focus match {
         case None ⇒ None
         case _    ⇒ json.as[ESError] match {
           case Right(e) ⇒ Some(e)

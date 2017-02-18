@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers._
 import akka.stream.Materializer
 import akka.util.ByteString
 import dutchman.http._
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
@@ -18,15 +19,18 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
 
   val http = Http(system)
   implicit val ec = system.dispatcher
+  val log = LoggerFactory.getLogger("dutchman.akka")
 
-  def documentExists(endpoint: Endpoint)(request: Request) = {
+  def documentExists(endpoint: Endpoint)(request: Request): Future[Boolean] = {
     http.singleRequest(buildRequest(endpoint, request, includeEntity = false)) map { response ⇒
+      log.debug(s"HTTPResponse: $response")
       if (response.status.isSuccess()) true else false
     }
   }
 
   def execute(endpoint: Endpoint)(request: Request): Future[String] = {
     http.singleRequest(buildRequest(endpoint, request)) flatMap {response ⇒
+      log.debug(s"HTTPResponse: $response")
       response.entity.dataBytes.runFold(ByteString(""))(_ ++ _).map(_.utf8String)
     }
   }
@@ -46,16 +50,19 @@ class AkkaHttpClient(implicit val system: ActorSystem, mat: Materializer) extend
     val hostHeader = request.headers.find(_.name == "Host").map(x ⇒ Host(x.value))
     val headers = request.headers.filterNot(_.name == "Host").map(x ⇒ RawHeader(x.name, x.value)) ++ hostHeader
 
-    httpRequest.withHeaders(headers: _*)
+    val finalRequest = httpRequest.withHeaders(headers: _*)
+    log.debug(s"HTTPRequest: $finalRequest")
+    finalRequest
   }
 
   private implicit class RequestUriBuilder(request: Request) {
-    def uri(endpoint: Endpoint) = Uri.from(
+    def queryString: Option[String] = if (request.params.isEmpty) None else Some(Uri.Query(request.params).toString())
+    def uri(endpoint: Endpoint): Uri = Uri.from(
       scheme = endpoint.protocol.toString,
       host = endpoint.host,
       port = endpoint.port,
       path = request.path,
-      queryString = Some(Uri.Query(request.params).toString())
+      queryString = queryString
     )
   }
 

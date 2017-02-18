@@ -1,6 +1,7 @@
 package dutchman
 
 import cats.data.EitherT
+import cats.free.Free
 
 object ops {
 
@@ -53,7 +54,8 @@ object ops {
 
   def refresh(indices: Idx*): ElasticResponse[RefreshResponse] =
     EitherT[ElasticOps, ESError, RefreshResponse]{
-      liftF(Refresh(indices))
+      val f: Free[_root_.dutchman.dsl.ElasticOp, _root_.dutchman.dsl.Result[_root_.dutchman.dsl.RefreshResponse]] = liftF(Refresh(indices))
+      f
     }
 
   def search[Json](index: Idx, `type`: Type, query: Query, options: Option[SearchOptions]): ElasticResponse[SearchResponse[Json]] =

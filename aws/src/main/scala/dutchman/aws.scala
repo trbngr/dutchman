@@ -48,7 +48,6 @@ object aws {
       val headerValue = s"$Algorithm Credential=${awsCredentials.getAWSAccessKeyId}/${credentialScope(dateStr)}, SignedHeaders=${signedHeaders(withDateAndHost)}" +
         s", Signature=${signature(url, withDateAndHost, dateTimeStr, dateStr)}"
 
-      // Append the session key, if session credentials were provided
       addSessionToken(withDateAndHost.copy(
         headers = Header("Authorization", headerValue) +: withDateAndHost.headers
       ))

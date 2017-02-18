@@ -22,16 +22,14 @@ class Interpreter[Json](client: HttpClient, endpoint: Endpoint, signer: ElasticR
       case c: Seq[_] ⇒ writer.write(c.asInstanceOf[Seq[ApiData]])
     } getOrElse writer.write(api.data)
 
-    println(s"request: ${api.request.verb} ${api.request.path}: $payload`")
     logger.debug(s"request: ${api.request.verb} ${api.request.path}: $payload`")
 
-    val request = signer.sign(endpoint, api.request).copy(
+    val request = signer.sign(endpoint, api.request.copy(
       payload = payload
-    )
+    ))
 
     client.execute(endpoint)(request) map { response ⇒
       val json = reader.read(response)
-      println(s"response: $json")
       logger.debug(s"response: $json")
       reader.readError(json) match {
         case Some(error) ⇒ Left(error)
