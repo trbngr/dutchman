@@ -2,7 +2,7 @@ import Dependencies._
 import com.amazonaws.services.s3.model.Region
 
 lazy val buildSettings = Seq(
-  version := "0.2.7",
+  version := "0.2.9",
   organization := "com.caliberweb",
   name := "dutchman",
   description := "Dutchman",
@@ -26,6 +26,11 @@ lazy val buildSettings = Seq(
 
   EclipseKeys.skipParents in ThisBuild := true,
 
+  mappings in (Compile, packageSrc) ++= {
+    val base  = (sourceManaged  in Compile).value
+    val files = (managedSources in Compile).value
+    files.map { f => (f, f.relativeTo(base).get.getPath) }
+  },
 
   //Let CTRL+C kill the current task and not the whole SBT session.
   cancelable in Global := true
@@ -51,7 +56,7 @@ lazy val dutchman = project.in(file("."))
     publishArtifact := false,
     publish := {}
   )
-  .aggregate(core, aws, circe, test, akka)
+  .aggregate(core, aws, circe, sprayJson, test, akka)
 
 lazy val core = project.in(file("core"))
   .settings(buildSettings: _*)
@@ -100,6 +105,17 @@ lazy val circe = project.in(file("circe"))
     name := "dutchman-circe",      
     moduleName := "dutchman-circe",
     libraryDependencies ++= Dependencies.circe,
+    libraryDependencies ++= Seq(slf4j, scalaTest % Test)
+  )
+  .dependsOn(core, test % Test)
+  .settings(publishSettings: _*)
+
+lazy val sprayJson = project.in(file("sprayjson"))
+  .settings(buildSettings: _*)
+  .settings(
+    name := "dutchman-sprayjson",
+    moduleName := "dutchman-sprayjson",
+    libraryDependencies ++= Seq(Dependencies.sprayJson),
     libraryDependencies ++= Seq(slf4j, scalaTest % Test)
   )
   .dependsOn(core, test % Test)
